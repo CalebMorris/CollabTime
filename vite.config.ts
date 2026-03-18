@@ -7,6 +7,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     env: { TZ: 'UTC' },
+    setupFiles: ['./src/test-setup.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
