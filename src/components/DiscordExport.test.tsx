@@ -22,36 +22,71 @@ describe('DiscordExport', () => {
     expect(container.firstChild).toBeNull()
   })
 
-  it('renders all 7 format rows', () => {
+  it('renders a toggle button', () => {
     render(<DiscordExport timestamp={TIMESTAMP_MS} timezone="UTC" />)
+    expect(screen.getByRole('button', { name: /discord timestamps/i })).toBeDefined()
+  })
+
+  it('renders the Discord icon inside the toggle button', () => {
+    render(<DiscordExport timestamp={TIMESTAMP_MS} timezone="UTC" />)
+    const button = screen.getByRole('button', { name: /discord timestamps/i })
+    expect(button.querySelector('svg')).not.toBeNull()
+  })
+
+  it('hides format rows by default', () => {
+    render(<DiscordExport timestamp={TIMESTAMP_MS} timezone="UTC" />)
+    expect(screen.queryAllByRole('button', { name: /copy/i })).toHaveLength(0)
+  })
+
+  it('shows format rows after clicking toggle', async () => {
+    render(<DiscordExport timestamp={TIMESTAMP_MS} timezone="UTC" />)
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /discord timestamps/i }))
+    })
     expect(screen.getAllByRole('button', { name: /copy/i })).toHaveLength(7)
   })
 
-  it('renders each Discord code', () => {
+  it('collapses formats when toggle is clicked again', async () => {
     render(<DiscordExport timestamp={TIMESTAMP_MS} timezone="UTC" />)
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /discord timestamps/i }))
+    })
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /discord timestamps/i }))
+    })
+    expect(screen.queryAllByRole('button', { name: /copy/i })).toHaveLength(0)
+  })
+
+  it('renders each Discord code when expanded', async () => {
+    render(<DiscordExport timestamp={TIMESTAMP_MS} timezone="UTC" />)
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: /discord timestamps/i })) })
     expect(screen.getByText('<t:1543392060:t>')).toBeDefined()
     expect(screen.getByText('<t:1543392060:R>')).toBeDefined()
   })
 
-  it('renders a preview for the short time format', () => {
+  it('renders a preview for the short time format when expanded', async () => {
     render(<DiscordExport timestamp={TIMESTAMP_MS} timezone="UTC" />)
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: /discord timestamps/i })) })
     // 2018-11-28T08:01:00Z in UTC → 8:01 AM
     expect(screen.getByTestId('preview-t').textContent).toContain('8:01')
   })
 
-  it('renders a preview for the long date format', () => {
+  it('renders a preview for the long date format when expanded', async () => {
     render(<DiscordExport timestamp={TIMESTAMP_MS} timezone="UTC" />)
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: /discord timestamps/i })) })
     expect(screen.getByTestId('preview-D').textContent).toContain('November')
     expect(screen.getByTestId('preview-D').textContent).toContain('2018')
   })
 
-  it('renders a preview for the long date/time format with weekday', () => {
+  it('renders a preview for the long date/time format with weekday when expanded', async () => {
     render(<DiscordExport timestamp={TIMESTAMP_MS} timezone="UTC" />)
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: /discord timestamps/i })) })
     expect(screen.getByTestId('preview-F').textContent).toContain('Wednesday')
   })
 
   it('calls clipboard.writeText with the correct code on click', async () => {
     render(<DiscordExport timestamp={TIMESTAMP_MS} timezone="UTC" />)
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: /discord timestamps/i })) })
     await act(async () => {
       fireEvent.click(screen.getAllByRole('button', { name: /copy/i })[0])
     })
@@ -60,6 +95,7 @@ describe('DiscordExport', () => {
 
   it('shows "Copied!" confirmation after clicking', async () => {
     render(<DiscordExport timestamp={TIMESTAMP_MS} timezone="UTC" />)
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: /discord timestamps/i })) })
     await act(async () => {
       fireEvent.click(screen.getAllByRole('button', { name: /copy/i })[0])
     })
@@ -68,6 +104,7 @@ describe('DiscordExport', () => {
 
   it('clears "Copied!" after 2 seconds', async () => {
     render(<DiscordExport timestamp={TIMESTAMP_MS} timezone="UTC" />)
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: /discord timestamps/i })) })
     await act(async () => {
       fireEvent.click(screen.getAllByRole('button', { name: /copy/i })[0])
     })

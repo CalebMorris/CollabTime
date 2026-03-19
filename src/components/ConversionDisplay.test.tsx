@@ -5,11 +5,9 @@ import { ConversionDisplay } from './ConversionDisplay'
 const NOV_28_2018_UTC_MS = 1543402860000 // 2018-11-28T11:01:00Z
 
 describe('ConversionDisplay', () => {
-  it('renders nothing when timestamp is null', () => {
-    const { container } = render(
-      <ConversionDisplay timestamp={null} timezone="America/New_York" />,
-    )
-    expect(container.firstChild).toBeNull()
+  it('renders a placeholder when timestamp is null', () => {
+    render(<ConversionDisplay timestamp={null} timezone="America/New_York" />)
+    expect(screen.getByTestId('result-placeholder')).toBeDefined()
   })
 
   it('shows the local time label', () => {

@@ -15,9 +15,9 @@ describe('ShareLink', () => {
     vi.useRealTimers()
   })
 
-  it('renders nothing when timestamp is null', () => {
-    const { container } = render(<ShareLink timestamp={null} />)
-    expect(container.firstChild).toBeNull()
+  it('renders a placeholder URL when timestamp is null', () => {
+    render(<ShareLink timestamp={null} />)
+    expect(screen.getByText(/\?t=…/)).toBeDefined()
   })
 
   it('displays the share URL', () => {

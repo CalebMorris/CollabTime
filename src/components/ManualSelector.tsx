@@ -1,8 +1,5 @@
-import { TimezoneSelect } from './TimezoneSelect'
-
 interface Props {
   timezone: string
-  onTimezoneChange: (tz: string) => void
   onTime: (ms: number) => void
   value?: number | null
 }
@@ -56,7 +53,7 @@ function localToUtcMs(localDateStr: string, timezone: string): number {
   return nominalUtc + (nominalUtc - tzNominal)
 }
 
-export function ManualSelector({ timezone, onTimezoneChange, onTime, value = null }: Props) {
+export function ManualSelector({ timezone, onTime, value = null }: Props) {
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.value) return
     onTime(localToUtcMs(e.target.value, timezone))
@@ -65,20 +62,17 @@ export function ManualSelector({ timezone, onTimezoneChange, onTime, value = nul
   const inputValue = value != null ? utcMsToLocalDateStr(value, timezone) : ''
 
   return (
-    <div className="flex flex-col gap-3">
-      <div>
-        <label htmlFor="manual-dt" className="block text-sm text-gray-300 mb-1">
-          Date and time
-        </label>
-        <input
-          id="manual-dt"
-          type="datetime-local"
-          value={inputValue}
-          onChange={handleDateChange}
-          className="rounded bg-gray-800 px-2 py-1 text-sm text-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-        />
-      </div>
-      <TimezoneSelect value={timezone} onChange={onTimezoneChange} />
+    <div>
+      <label htmlFor="manual-dt" className="block text-sm text-gray-300 mb-1">
+        Date and time
+      </label>
+      <input
+        id="manual-dt"
+        type="datetime-local"
+        value={inputValue}
+        onChange={handleDateChange}
+        className="rounded bg-gray-800 px-2 py-1 text-sm text-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+      />
     </div>
   )
 }

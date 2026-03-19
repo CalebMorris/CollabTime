@@ -4,6 +4,8 @@ import { getSortedTimezones } from '../utils/timezones'
 interface Props {
   value: string
   onChange: (tz: string) => void
+  autoFocus?: boolean
+  initialQuery?: string
 }
 
 const ALL_ENTRIES = getSortedTimezones()
@@ -14,8 +16,8 @@ function filterEntries(query: string) {
   return ALL_ENTRIES.filter(e => e.label.toLowerCase().includes(q))
 }
 
-export function TimezoneSelect({ value, onChange }: Props) {
-  const [query, setQuery] = useState(value)
+export function TimezoneSelect({ value, onChange, autoFocus, initialQuery }: Props) {
+  const [query, setQuery] = useState(initialQuery !== undefined ? initialQuery : value)
   const [focusedIndex, setFocusedIndex] = useState(-1)
 
   const listboxId = useId()
@@ -71,6 +73,7 @@ export function TimezoneSelect({ value, onChange }: Props) {
         value={query}
         onChange={handleQueryChange}
         onKeyDown={handleKeyDown}
+        autoFocus={autoFocus}
         className="rounded bg-gray-800 px-2 py-1 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
       />
       {isDirty && !query && (

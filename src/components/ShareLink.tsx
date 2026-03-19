@@ -9,11 +9,12 @@ interface Props {
 export function ShareLink({ timestamp }: Props) {
   const [copied, setCopied] = useState(false)
 
-  if (timestamp === null) return null
-
-  const url = `${window.location.origin}${window.location.pathname}${encodeDeepLink(timestamp)}`
+  const url = timestamp !== null
+    ? `${window.location.origin}${window.location.pathname}${encodeDeepLink(timestamp)}`
+    : null
 
   const handleCopy = () => {
+    if (!url) return
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
@@ -22,12 +23,14 @@ export function ShareLink({ timestamp }: Props) {
 
   return (
     <div className="flex items-center gap-2 rounded bg-gray-800 px-3 py-2">
-      <code className="flex-1 text-sm text-indigo-300 font-mono truncate">{url}</code>
+      <code className="flex-1 text-sm text-indigo-300 font-mono truncate">
+        {url ?? `${window.location.origin}${window.location.pathname}?t=…`}
+      </code>
       <button
         aria-label="Copy link"
         aria-live="polite"
         onClick={handleCopy}
-        className="text-xs px-2 py-0.5 rounded bg-gray-700 hover:bg-gray-600 text-gray-200 shrink-0"
+        className="min-h-[44px] px-3 rounded bg-gray-700 hover:bg-gray-600 text-gray-200 text-xs shrink-0"
       >
         {copied ? 'Copied!' : <Share2 className="w-4 h-4" />}
       </button>

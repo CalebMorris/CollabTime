@@ -30,7 +30,6 @@ describe('Accessibility: no axe violations', () => {
     const { container } = render(
       <ManualSelector
         timezone={TIMEZONE}
-        onTimezoneChange={() => {}}
         onTime={() => {}}
         value={FIXED_MS}
       />,
