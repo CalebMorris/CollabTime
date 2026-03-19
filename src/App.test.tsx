@@ -24,6 +24,19 @@ describe('App', () => {
     expect(dtInput.value).toBe('2018-11-28T11:01')
   })
 
+  it('populates text input with short date/time format when deep link loads', () => {
+    Object.defineProperty(window, 'location', {
+      value: { ...window.location, search: '?t=1543392060' },
+      configurable: true,
+    })
+    render(<App />)
+    const textarea = screen.getByRole('textbox', { name: /enter time/i }) as HTMLTextAreaElement
+    // Discord 'f' format in UTC → "November 28, 2018 at 8:01 AM"
+    expect(textarea.value).toContain('November')
+    expect(textarea.value).toContain('2018')
+    expect(textarea.value).toContain('8:01')
+  })
+
   it('syncs selected time when manual picker changes', () => {
     render(<App />)
 

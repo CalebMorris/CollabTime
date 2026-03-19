@@ -7,12 +7,20 @@ import { ConversionDisplay } from './components/ConversionDisplay'
 import { DiscordExport } from './components/DiscordExport'
 import { ShareLink } from './components/ShareLink'
 import { DiscordIcon } from './components/DiscordIcon'
+import { getAllFormats } from './utils/discordTimestamp'
 
 function App() {
   const { timezone, setTimezone } = useTimezone()
   const [timestamp, setTimestamp] = useState<number | null>(null)
+  const [importText, setImportText] = useState<string | null>(null)
 
-  useDeepLink(setTimestamp, timestamp)
+  const handleDeepLinkLoad = (ms: number) => {
+    setTimestamp(ms)
+    const preview = getAllFormats(Math.floor(ms / 1000), timezone).find(f => f.flag === 'f')?.preview ?? null
+    setImportText(preview)
+  }
+
+  useDeepLink(handleDeepLinkLoad, timestamp)
 
   return (
     <main className="min-h-screen bg-gray-950 text-gray-100 p-8">
@@ -21,7 +29,7 @@ function App() {
       <div className="max-w-md flex flex-col gap-8">
         <section>
           <h2 className="text-sm font-medium text-gray-400 mb-2">Paste or type a time</h2>
-          <TextImport onTime={setTimestamp} />
+          <TextImport onTime={setTimestamp} externalValue={importText} />
         </section>
 
         <section>

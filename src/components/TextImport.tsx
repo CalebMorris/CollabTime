@@ -1,12 +1,17 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { parseTime } from '../utils/parseTime'
 
 interface Props {
   onTime: (ms: number) => void
+  externalValue?: string | null
 }
 
-export function TextImport({ onTime }: Props) {
+export function TextImport({ onTime, externalValue = null }: Props) {
   const [input, setInput] = useState('')
+
+  useEffect(() => {
+    if (externalValue != null) setInput(externalValue)
+  }, [externalValue])
   const [error, setError] = useState<string | null>(null)
 
   const handleParse = () => {
