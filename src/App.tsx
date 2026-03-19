@@ -6,6 +6,7 @@ import { ManualSelector } from './components/ManualSelector'
 import { ConversionDisplay } from './components/ConversionDisplay'
 import { DiscordExport } from './components/DiscordExport'
 import { ShareLink } from './components/ShareLink'
+import { CalendarExport } from './components/CalendarExport'
 import { TimezoneSelect } from './components/TimezoneSelect'
 import { getAllFormats } from './utils/discordTimestamp'
 
@@ -123,6 +124,7 @@ function App() {
               Share &amp; Export
             </h2>
             <ShareLink timestamp={timestamp} />
+            <CalendarExport timestamp={timestamp} />
             <div className="rounded-lg border border-gray-700 bg-gray-900 p-3">
               <DiscordExport timestamp={timestamp} timezone={timezone} />
             </div>

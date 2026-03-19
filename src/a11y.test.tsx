@@ -7,6 +7,7 @@ import { ManualSelector } from './components/ManualSelector'
 import { ConversionDisplay } from './components/ConversionDisplay'
 import { DiscordExport } from './components/DiscordExport'
 import { ShareLink } from './components/ShareLink'
+import { CalendarExport } from './components/CalendarExport'
 import { TimezoneSelect } from './components/TimezoneSelect'
 
 // Nov 28 2018 11:01:00 UTC — a fixed, well-known timestamp
@@ -67,5 +68,19 @@ describe('Accessibility: no axe violations', () => {
     })
     const { container } = render(<ShareLink timestamp={FIXED_MS} />)
     expect(await axe(container)).toHaveNoViolations()
+  })
+
+  it('CalendarExport — renders download button with accessible label', async () => {
+    vi.stubGlobal('URL', {
+      createObjectURL: vi.fn(() => 'blob:fake-url'),
+      revokeObjectURL: vi.fn(),
+    })
+    const { container, getByRole } = render(<CalendarExport timestamp={FIXED_MS} />)
+    const button = getByRole('button', { name: /download .ics/i })
+    expect(button).toBeDefined()
+    // Meets minimum 44px touch target via min-h-[44px] Tailwind class
+    expect(button.className).toContain('min-h-[44px]')
+    expect(await axe(container)).toHaveNoViolations()
+    vi.unstubAllGlobals()
   })
 })

@@ -35,6 +35,16 @@ mkdirSync(OUTPUT_DIR, { recursive: true })
 
 // ── Server lifecycle ──────────────────────────────────────────────────────────
 
+// Kill any process already occupying the preview port so we always serve
+// from this working directory, not a leftover server from another worktree.
+try {
+  const pids = execSync(`lsof -ti :${PREVIEW_PORT}`, { stdio: 'pipe' }).toString().trim()
+  if (pids) {
+    console.warn(`⚠ Killing existing process(es) on port ${PREVIEW_PORT} (PIDs: ${pids.replace(/\n/g, ', ')})`)
+    execSync(`echo ${pids} | xargs kill -9`, { stdio: 'pipe' })
+  }
+} catch { /* nothing was running on that port */ }
+
 const previewProcess = spawn(
   'node_modules/.bin/vite',
   ['preview', '--port', String(PREVIEW_PORT)],
