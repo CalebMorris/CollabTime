@@ -43,6 +43,26 @@ describe('TextImport', () => {
     expect(screen.getByRole('alert')).toBeDefined()
   })
 
+  it('Enter key triggers parse', async () => {
+    const user = userEvent.setup()
+    const onTime = vi.fn()
+    render(<TextImport onTime={onTime} />)
+    await user.type(screen.getByRole('textbox', { name: /enter time/i }), '1543392060')
+    await user.keyboard('{Enter}')
+    expect(onTime).toHaveBeenCalledWith(1543392060000)
+  })
+
+  it('Shift+Enter inserts a newline instead of parsing', async () => {
+    const user = userEvent.setup()
+    const onTime = vi.fn()
+    render(<TextImport onTime={onTime} />)
+    await user.type(screen.getByRole('textbox', { name: /enter time/i }), 'hello')
+    await user.keyboard('{Shift>}{Enter}{/Shift}')
+    const textarea = screen.getByRole('textbox', { name: /enter time/i }) as HTMLTextAreaElement
+    expect(textarea.value).toContain('\n')
+    expect(onTime).not.toHaveBeenCalled()
+  })
+
   it('clears the error after a successful parse', async () => {
     const user = userEvent.setup()
     render(<TextImport onTime={() => {}} />)
