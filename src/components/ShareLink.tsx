@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Share2 } from 'lucide-react'
 import { encodeDeepLink } from '../utils/deepLink'
 
 interface Props {
@@ -27,7 +28,7 @@ export function ShareLink({ timestamp }: Props) {
         onClick={handleCopy}
         className="text-xs px-2 py-0.5 rounded bg-gray-700 hover:bg-gray-600 text-gray-200 shrink-0"
       >
-        {copied ? 'Copied!' : 'Copy link'}
+        {copied ? 'Copied!' : <Share2 className="w-4 h-4" />}
       </button>
     </div>
   )

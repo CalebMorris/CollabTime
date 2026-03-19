@@ -11,17 +11,21 @@ describe('TimezoneSelect', () => {
     expect(screen.getByRole('textbox', { name: /search timezones/i })).toBeDefined()
   })
 
-  it('renders timezone options', () => {
+  it('renders timezone options with UTC offset labels', () => {
     render(<TimezoneSelect value="America/New_York" onChange={() => {}} />)
-    expect(screen.getByRole('option', { name: 'America/New_York' })).toBeDefined()
+    // Options now display "(UTC-N:MM) America/New_York"
+    const option = screen.getAllByRole('option').find(o => o.getAttribute('value') === 'America/New_York')
+    expect(option).toBeDefined()
+    expect(option!.textContent).toMatch(/^\(UTC/)
   })
 
   it('filters options when searching', async () => {
     const user = userEvent.setup()
     render(<TimezoneSelect value="America/New_York" onChange={() => {}} />)
     await user.type(screen.getByRole('textbox', { name: /search timezones/i }), 'london')
-    expect(screen.getByRole('option', { name: 'Europe/London' })).toBeDefined()
-    expect(screen.queryByRole('option', { name: 'America/New_York' })).toBeNull()
+    const option = screen.getAllByRole('option').find(o => o.getAttribute('value') === 'Europe/London')
+    expect(option).toBeDefined()
+    expect(screen.queryAllByRole('option').find(o => o.getAttribute('value') === 'America/New_York')).toBeUndefined()
   })
 
   it('calls onChange when an option is clicked in the listbox', async () => {

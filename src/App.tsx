@@ -6,6 +6,7 @@ import { ManualSelector } from './components/ManualSelector'
 import { ConversionDisplay } from './components/ConversionDisplay'
 import { DiscordExport } from './components/DiscordExport'
 import { ShareLink } from './components/ShareLink'
+import { DiscordIcon } from './components/DiscordIcon'
 
 function App() {
   const { timezone, setTimezone } = useTimezone()
@@ -38,8 +39,13 @@ function App() {
         {timestamp !== null && (
           <>
             <section>
-              <h2 className="text-sm font-medium text-gray-400 mb-2">Discord timestamps</h2>
-              <DiscordExport timestamp={timestamp} timezone={timezone} />
+              <h2 className="flex items-center gap-1.5 text-sm font-medium text-gray-400 mb-2">
+                <DiscordIcon className="w-4 h-4 text-indigo-400" />
+                Discord timestamps
+              </h2>
+              <div className="rounded-lg border border-gray-700 bg-gray-900 p-3">
+                <DiscordExport timestamp={timestamp} timezone={timezone} />
+              </div>
             </section>
 
             <section>

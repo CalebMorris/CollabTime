@@ -1,22 +1,27 @@
 import { useState } from 'react'
-import { filterTimezones, getAllTimezones } from '../utils/timezones'
+import { getSortedTimezones } from '../utils/timezones'
 
 interface Props {
   value: string
   onChange: (tz: string) => void
 }
 
-const ALL_ZONES = getAllTimezones()
+const ALL_ENTRIES = getSortedTimezones()
+
+function filterEntries(query: string) {
+  if (!query) return ALL_ENTRIES
+  const q = query.toLowerCase()
+  return ALL_ENTRIES.filter(e => e.label.toLowerCase().includes(q))
+}
 
 export function TimezoneSelect({ value, onChange }: Props) {
   const [query, setQuery] = useState('')
   const [focusedIndex, setFocusedIndex] = useState(-1)
 
-  const filtered = filterTimezones(query, ALL_ZONES)
+  const filtered = filterEntries(query)
 
-  // Clamp focusedIndex to the current list length so stale indices stay valid
   const safeIndex = Math.min(focusedIndex, filtered.length - 1)
-  const highlightedTz = safeIndex >= 0 ? filtered[safeIndex] : null
+  const highlightedTz = safeIndex >= 0 ? filtered[safeIndex]?.tz : null
 
   const commit = (tz: string | null | undefined) => {
     if (tz && tz !== value) onChange(tz)
@@ -35,12 +40,10 @@ export function TimezoneSelect({ value, onChange }: Props) {
         break
       case 'ArrowUp':
         e.preventDefault()
-        // ArrowUp from -1 or 0 stays put; otherwise move up
         setFocusedIndex(prev => (prev <= 0 ? prev : prev - 1))
         break
       case 'Enter':
-        // Commit the keyboard-highlighted item, or the sole remaining item
-        commit(highlightedTz ?? (filtered.length === 1 ? filtered[0] : null))
+        commit(highlightedTz ?? (filtered.length === 1 ? filtered[0]?.tz : null))
         break
     }
   }
@@ -64,9 +67,9 @@ export function TimezoneSelect({ value, onChange }: Props) {
         size={6}
         className={`rounded bg-gray-800 text-sm text-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-500 ${filtered.length === 1 ? 'ring-1 ring-indigo-400' : ''}`}
       >
-        {filtered.map(tz => (
+        {filtered.map(({ tz, label }) => (
           <option key={tz} value={tz}>
-            {tz}
+            {label}
           </option>
         ))}
       </select>
