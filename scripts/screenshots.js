@@ -1,6 +1,5 @@
-import { chromium } from 'playwright'
 import { spawn, execSync } from 'child_process'
-import { mkdirSync } from 'fs'
+import { mkdirSync, existsSync } from 'fs'
 import { setTimeout as sleep } from 'timers/promises'
 
 // ── Config ────────────────────────────────────────────────────────────────────
@@ -8,6 +7,7 @@ import { setTimeout as sleep } from 'timers/promises'
 const PREVIEW_PORT = 4173
 const BASE_URL = `http://localhost:${PREVIEW_PORT}/CollabTime/`
 const OUTPUT_DIR = 'docs/screenshots'
+const DEEP_LINK_TIMESTAMP_S = 1543392060   // 2018-11-28 ~00:01 UTC
 
 const FORM_FACTORS = [
   { name: 'mobile-sm',    width: 375,  height: 667  },
@@ -16,6 +16,15 @@ const FORM_FACTORS = [
   { name: 'desktop',     width: 1280, height: 900  },
   { name: 'desktop-wide', width: 1920, height: 1080 },
 ]
+
+// ── Playwright ────────────────────────────────────────────────────────────────
+
+if (!existsSync('node_modules/playwright')) {
+  console.log('playwright not found — installing…')
+  execSync('npm install --save-dev playwright', { stdio: 'inherit' })
+}
+
+const { chromium } = await import('playwright')
 
 // ── Build ─────────────────────────────────────────────────────────────────────
 
@@ -72,6 +81,14 @@ for (const { name, width, height } of FORM_FACTORS) {
   const outputPath = `${OUTPUT_DIR}/${name}.png`
   await page.screenshot({ path: outputPath, fullPage: false })
   console.log(`  ${name} (${width}×${height}) → ${outputPath}`)
+
+  // Deep-link screenshot (app pre-loaded with a timestamp)
+  const dlPage = await context.newPage()
+  await dlPage.goto(`${BASE_URL}?t=${DEEP_LINK_TIMESTAMP_S}`, { waitUntil: 'networkidle' })
+  const dlOutputPath = `${OUTPUT_DIR}/${name}-deep-link.png`
+  await dlPage.screenshot({ path: dlOutputPath, fullPage: false })
+  console.log(`  ${name}-deep-link (${width}×${height}) → ${dlOutputPath}`)
+
   await context.close()
 }
 
