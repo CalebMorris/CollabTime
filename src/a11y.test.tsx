@@ -45,9 +45,18 @@ describe('Accessibility: no axe violations', () => {
     expect(await axe(container)).toHaveNoViolations()
   })
 
-  it('ConversionDisplay', async () => {
+  it('ConversionDisplay — past timestamp', async () => {
     const { container } = render(
       <ConversionDisplay timestamp={FIXED_MS} timezone={TIMEZONE} />,
+    )
+    expect(await axe(container)).toHaveNoViolations()
+  })
+
+  it('ConversionDisplay — future timestamp', async () => {
+    // Use a real future timestamp to avoid fake-timer conflicts with axe internals
+    const futureTimestamp = Date.now() + 60_000
+    const { container } = render(
+      <ConversionDisplay timestamp={futureTimestamp} timezone={TIMEZONE} />,
     )
     expect(await axe(container)).toHaveNoViolations()
   })
