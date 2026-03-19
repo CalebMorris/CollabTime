@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTimezone } from './hooks/useTimezone'
 import { TextImport } from './components/TextImport'
 import { ManualSelector } from './components/ManualSelector'
+import { ConversionDisplay } from './components/ConversionDisplay'
 
 function App() {
   const { timezone, setTimezone } = useTimezone()
@@ -27,12 +28,7 @@ function App() {
           />
         </section>
 
-        {timestamp !== null && (
-          <section className="rounded bg-gray-800 p-4">
-            <h2 className="text-sm font-medium text-gray-400 mb-1">Selected time</h2>
-            <p className="font-mono text-indigo-300">{new Date(timestamp).toISOString()}</p>
-          </section>
-        )}
+        <ConversionDisplay timestamp={timestamp} timezone={timezone} />
       </div>
     </main>
   )

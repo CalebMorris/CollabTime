@@ -31,7 +31,7 @@ describe('App', () => {
       target: { value: '2018-11-28T11:01' },
     })
 
-    // Selected time panel should appear with the ISO string
-    expect(screen.getByText(/2018-11-28/)).toBeDefined()
+    // ConversionDisplay should appear with the formatted date
+    expect(screen.getByTestId('utc-time').textContent).toContain('11:01')
   })
 })
