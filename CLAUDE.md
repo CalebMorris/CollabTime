@@ -28,6 +28,13 @@ npm run coverage  # test coverage
 
 Use red-green TDD. Write a failing test first, then implement. Tests live alongside source files (`*.test.ts` / `*.test.tsx`).
 
+## Accessibility
+
+Keep accessibility up to date alongside any UI/UX change:
+- Update ARIA roles, labels, and attributes when markup changes
+- Ensure keyboard navigation and focus order remain correct
+- Add or update `a11y.test.tsx` coverage for new/changed interactive elements
+
 ## MVP Scope
 
 - Timezone detection from browser (user-overridable)
