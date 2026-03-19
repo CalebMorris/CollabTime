@@ -36,7 +36,7 @@ describe('Accessibility: no axe violations', () => {
       />,
     )
     expect(await axe(container)).toHaveNoViolations()
-  }, 15000)
+  })
 
   it('TimezoneSelect', async () => {
     const { container } = render(

@@ -10,7 +10,7 @@ describe('ManualSelector', () => {
 
   it('renders the timezone selector', () => {
     render(<ManualSelector timezone="UTC" onTimezoneChange={() => {}} onTime={() => {}} />)
-    expect(screen.getByRole('textbox', { name: /search timezones/i })).toBeDefined()
+    expect(screen.getByRole('combobox', { name: /search timezones/i })).toBeDefined()
   })
 
   it('emits correct UTC ms for a datetime in UTC', () => {
