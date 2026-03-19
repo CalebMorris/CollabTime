@@ -3,6 +3,7 @@ import { useTimezone } from './hooks/useTimezone'
 import { TextImport } from './components/TextImport'
 import { ManualSelector } from './components/ManualSelector'
 import { ConversionDisplay } from './components/ConversionDisplay'
+import { DiscordExport } from './components/DiscordExport'
 
 function App() {
   const { timezone, setTimezone } = useTimezone()
@@ -29,6 +30,13 @@ function App() {
         </section>
 
         <ConversionDisplay timestamp={timestamp} timezone={timezone} />
+
+        {timestamp !== null && (
+          <section>
+            <h2 className="text-sm font-medium text-gray-400 mb-2">Discord timestamps</h2>
+            <DiscordExport timestamp={timestamp} timezone={timezone} />
+          </section>
+        )}
       </div>
     </main>
   )
