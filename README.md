@@ -1,5 +1,23 @@
 # Collab Time
 
+## Setup
+
+After `npm install`, install the Playwright browser binary (one-time):
+
+```
+npx playwright install chromium
+```
+
+Then take screenshots across all form factors:
+
+```
+npm run screenshots
+```
+
+Output: `docs/screenshots/{mobile-sm,mobile-lg,tablet,desktop,desktop-wide}.png`
+
+---
+
 Rough idea: Simple JackBox-style way to coordinate timing of an event between multiple people that live in different regions and timezones.
 
 Planned phases:

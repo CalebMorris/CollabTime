@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "screenshots": "node scripts/screenshots.js"
   },
   "dependencies": {
     "chrono-node": "^2.7.7",
@@ -28,6 +29,7 @@
     "@vitest/coverage-v8": "^3.0.0",
     "jest-axe": "^10.0.0",
     "jsdom": "^26.0.0",
+    "playwright": "^1.58.2",
     "tailwindcss": "^4.0.0",
     "typescript": "~5.7.2",
     "vite": "^6.2.0",
