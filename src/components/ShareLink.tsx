@@ -25,6 +25,7 @@ export function ShareLink({ timestamp }: Props) {
       <code className="flex-1 text-sm text-indigo-300 font-mono truncate">{url}</code>
       <button
         aria-label="Copy link"
+        aria-live="polite"
         onClick={handleCopy}
         className="text-xs px-2 py-0.5 rounded bg-gray-700 hover:bg-gray-600 text-gray-200 shrink-0"
       >

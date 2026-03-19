@@ -27,13 +27,13 @@ function App() {
       <h1 className="text-2xl font-bold mb-8">CollabTime</h1>
 
       <div className="max-w-md flex flex-col gap-8">
-        <section>
-          <h2 className="text-sm font-medium text-gray-400 mb-2">Paste or type a time</h2>
+        <section aria-labelledby="section-text-import">
+          <h2 id="section-text-import" className="text-sm font-medium text-gray-300 mb-2">Paste or type a time</h2>
           <TextImport onTime={setTimestamp} externalValue={importText} />
         </section>
 
-        <section>
-          <h2 className="text-sm font-medium text-gray-400 mb-2">Pick a time manually</h2>
+        <section aria-labelledby="section-manual">
+          <h2 id="section-manual" className="text-sm font-medium text-gray-300 mb-2">Pick a time manually</h2>
           <ManualSelector
             timezone={timezone}
             onTimezoneChange={setTimezone}
@@ -46,8 +46,8 @@ function App() {
 
         {timestamp !== null && (
           <>
-            <section>
-              <h2 className="flex items-center gap-1.5 text-sm font-medium text-gray-400 mb-2">
+            <section aria-labelledby="section-discord">
+              <h2 id="section-discord" className="flex items-center gap-1.5 text-sm font-medium text-gray-300 mb-2">
                 <DiscordIcon className="w-4 h-4 text-indigo-400" />
                 Discord timestamps
               </h2>
@@ -56,8 +56,8 @@ function App() {
               </div>
             </section>
 
-            <section>
-              <h2 className="text-sm font-medium text-gray-400 mb-2">Share link</h2>
+            <section aria-labelledby="section-share">
+              <h2 id="section-share" className="text-sm font-medium text-gray-300 mb-2">Share link</h2>
               <ShareLink timestamp={timestamp} />
             </section>
           </>

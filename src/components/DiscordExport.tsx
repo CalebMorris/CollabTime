@@ -25,7 +25,7 @@ export function DiscordExport({ timestamp, timezone }: Props) {
     <div className="flex flex-col gap-2">
       {formats.map(({ flag, code, label, preview }) => (
         <div key={flag} className="flex items-center gap-3 rounded bg-gray-800 px-3 py-2">
-          <span className="w-28 text-xs text-gray-400 shrink-0">{label}</span>
+          <span className="w-28 text-xs text-gray-300 shrink-0">{label}</span>
           <div className="flex-1 min-w-0">
             <p data-testid={`preview-${flag}`} className="text-sm text-gray-100 truncate">
               {preview}
@@ -34,6 +34,7 @@ export function DiscordExport({ timestamp, timezone }: Props) {
           </div>
           <button
             aria-label={`Copy ${label}`}
+            aria-live="polite"
             onClick={() => handleCopy(code, flag)}
             className="text-xs px-2 py-0.5 rounded bg-gray-700 hover:bg-gray-600 text-gray-200 shrink-0"
           >

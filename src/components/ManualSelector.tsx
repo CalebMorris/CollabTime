@@ -67,7 +67,7 @@ export function ManualSelector({ timezone, onTimezoneChange, onTime, value = nul
   return (
     <div className="flex flex-col gap-3">
       <div>
-        <label htmlFor="manual-dt" className="block text-sm text-gray-400 mb-1">
+        <label htmlFor="manual-dt" className="block text-sm text-gray-300 mb-1">
           Date and time
         </label>
         <input
@@ -75,7 +75,6 @@ export function ManualSelector({ timezone, onTimezoneChange, onTime, value = nul
           type="datetime-local"
           value={inputValue}
           onChange={handleDateChange}
-          aria-label="Date and time"
           className="rounded bg-gray-800 px-2 py-1 text-sm text-gray-100 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         />
       </div>

@@ -35,6 +35,7 @@ export function TextImport({ onTime, externalValue = null }: Props) {
     <div className="flex flex-col gap-2">
       <textarea
         aria-label="Enter time"
+        aria-describedby={error ? 'time-input-error' : undefined}
         rows={2}
         value={input}
         onChange={e => setInput(e.target.value)}
@@ -49,7 +50,7 @@ export function TextImport({ onTime, externalValue = null }: Props) {
         Parse
       </button>
       {error && (
-        <p role="alert" className="text-sm text-red-400">
+        <p id="time-input-error" role="alert" className="text-sm text-red-400">
           {error}
         </p>
       )}

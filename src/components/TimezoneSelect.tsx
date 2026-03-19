@@ -53,6 +53,7 @@ export function TimezoneSelect({ value, onChange }: Props) {
       <input
         type="text"
         aria-label="Search timezones"
+        aria-controls="timezone-listbox"
         placeholder="Search timezones…"
         value={query}
         onChange={handleQueryChange}
@@ -60,6 +61,7 @@ export function TimezoneSelect({ value, onChange }: Props) {
         className="rounded bg-gray-800 px-2 py-1 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
       />
       <select
+        id="timezone-listbox"
         aria-label="Select timezone"
         value={highlightedTz ?? value}
         onClick={e => commit((e.target as HTMLSelectElement).value)}
