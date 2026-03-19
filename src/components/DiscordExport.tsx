@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { getAllFormats } from '../utils/discordTimestamp'
 import { DiscordIcon } from './DiscordIcon'
 
@@ -10,6 +10,20 @@ interface Props {
 export function DiscordExport({ timestamp, timezone }: Props) {
   const [copiedFlag, setCopiedFlag] = useState<string | null>(null)
   const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!isOpen) return
+    if (!containerRef.current) return
+
+    const prefersReducedMotion =
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+
+    containerRef.current.scrollIntoView?.({
+      behavior: prefersReducedMotion ? 'instant' : 'smooth',
+      block: 'nearest',
+    })
+  }, [isOpen])
 
   if (timestamp === null) return null
 
@@ -24,7 +38,7 @@ export function DiscordExport({ timestamp, timezone }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div ref={containerRef} className="flex flex-col gap-2">
       <button
         aria-label="Discord timestamps"
         aria-expanded={isOpen}
@@ -38,7 +52,7 @@ export function DiscordExport({ timestamp, timezone }: Props) {
         <span aria-hidden="true">{isOpen ? '▾' : '▸'}</span>
       </button>
       {isOpen && formats.map(({ flag, code, label, preview }) => (
-        <div key={flag} className="flex items-center gap-3 rounded bg-gray-800 px-3 py-2">
+        <div key={flag} className="flex items-center gap-3 rounded bg-gray-800 px-3 py-2 animate-fade-slide-up">
           <span className="w-28 text-xs text-gray-300 shrink-0">{label}</span>
           <div className="flex-1 min-w-0">
             <p data-testid={`preview-${flag}`} className="text-sm text-gray-100 truncate">

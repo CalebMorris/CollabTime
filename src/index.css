@@ -41,3 +41,16 @@
     animation: none;
   }
 }
+
+@keyframes fade-slide-up {
+  from { transform: translateY(8px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+
+.animate-fade-slide-up {
+  animation: fade-slide-up 0.25s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-slide-up { animation: none; }
+}

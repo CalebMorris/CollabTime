@@ -15,6 +15,7 @@ describe('DiscordExport', () => {
 
   afterEach(() => {
     vi.useRealTimers()
+    delete (HTMLElement.prototype as any).scrollIntoView
   })
 
   it('renders nothing when timestamp is null', () => {
@@ -111,5 +112,56 @@ describe('DiscordExport', () => {
     expect(screen.getByText('Copied!')).toBeDefined()
     act(() => { vi.advanceTimersByTime(2000) })
     expect(screen.queryByText('Copied!')).toBeNull()
+  })
+
+  it('calls scrollIntoView on the container when expanded', async () => {
+    const scrollMock = vi.fn()
+    HTMLElement.prototype.scrollIntoView = scrollMock
+    render(<DiscordExport timestamp={TIMESTAMP_MS} timezone="UTC" />)
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /discord timestamps/i }))
+    })
+    expect(scrollMock).toHaveBeenCalledOnce()
+    expect(scrollMock).toHaveBeenCalledWith(expect.objectContaining({ block: 'nearest' }))
+  })
+
+  it('does not call scrollIntoView when collapsing', async () => {
+    const scrollMock = vi.fn()
+    HTMLElement.prototype.scrollIntoView = scrollMock
+    render(<DiscordExport timestamp={TIMESTAMP_MS} timezone="UTC" />)
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /discord timestamps/i }))
+    })
+    scrollMock.mockClear()
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /discord timestamps/i }))
+    })
+    expect(scrollMock).not.toHaveBeenCalled()
+  })
+
+  it('uses instant scroll when prefers-reduced-motion is set', async () => {
+    vi.stubGlobal('matchMedia', (q: string) => ({
+      matches: q === '(prefers-reduced-motion: reduce)',
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }))
+    const scrollMock = vi.fn()
+    HTMLElement.prototype.scrollIntoView = scrollMock
+    render(<DiscordExport timestamp={TIMESTAMP_MS} timezone="UTC" />)
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /discord timestamps/i }))
+    })
+    expect(scrollMock).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'instant' }))
+    vi.unstubAllGlobals()
+  })
+
+  it('applies animate-fade-slide-up to each format row when expanded', async () => {
+    render(<DiscordExport timestamp={TIMESTAMP_MS} timezone="UTC" />)
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /discord timestamps/i }))
+    })
+    screen.getAllByRole('button', { name: /copy/i }).forEach(btn => {
+      expect(btn.closest('div')?.className).toContain('animate-fade-slide-up')
+    })
   })
 })
