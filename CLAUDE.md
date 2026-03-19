@@ -19,6 +19,11 @@ npm run lint      # eslint
 npm run coverage  # test coverage
 ```
 
+## Conventions
+
+- Use `jq` instead of Python for parsing JSON in shell scripts or commands
+- Use descriptive variable names that convey context; avoid short single-word names (e.g. prefer `selectedTimezone` over `tz`, `parsedTimestamp` over `ts`)
+
 ## Testing
 
 Use red-green TDD. Write a failing test first, then implement. Tests live alongside source files (`*.test.ts` / `*.test.tsx`).
