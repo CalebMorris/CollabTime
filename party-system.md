@@ -47,17 +47,16 @@ CollabTime's party system is a lightweight, ephemeral, multiplayer timezone nego
 
 ### Display Names
 
-**Decision (privacy doc, supersedes wireframes):** Auto-generated anonymous nicknames. No free-text name entry.
+**Decision (privacy doc, supersedes wireframes; re-roll dropped in MVP):** Auto-generated anonymous nicknames. No free-text name entry. No re-roll — nickname is fixed for the session.
 
 - Nickname format: two-word combos (e.g., "Teal Fox", "Quick River")
-- User can tap **[🔀 New nickname]** to get a different one
 - Nickname exists only for the session duration
 - Wordlist: curated server-side, ~1M combinations (1000 adj × 1000 noun), no offensive terms
 
-**UI:** Replace any "Your display name:" text input with a nickname display + re-roll button:
+**UI:** Replace any "Your display name:" text input with a static nickname display:
 ```
 Your nickname this session:
-  Teal Fox  [🔀 New nickname]
+  Teal Fox
 ```
 
 ### Timezone Visibility
@@ -125,7 +124,7 @@ The wireframes (`party-system-wireframes.md`) were drafted before the privacy re
 |---|---|---|
 | Proposals board participant label | `Sarah (EST)` | `Teal Fox` (auto-nickname, no TZ) |
 | Proposals board time display | Time in participant's TZ + TZ label | Time in viewer's TZ, no TZ label |
-| Join screen name field | Free-text "Your display name:" input | Auto-generated nickname + re-roll button |
+| Join screen name field | Free-text "Your display name:" input | Auto-generated nickname (static, no re-roll in MVP) |
 | Export participant list | Shows `✓ Sarah (GMT-06) · 2:30 PM` | Nicknames only; TZ hidden or omitted |
 | Join screen | No privacy notice | Footer: "Nicknames and proposals exist only during the session." |
 | URL param name | Inconsistent (`?session=` vs `?code=`) | Standardize to `?code=` |

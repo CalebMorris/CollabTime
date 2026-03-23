@@ -17,7 +17,7 @@ Users of CollabTime may not want others to know where they live (timezone = loca
 | Decision | Answer |
 |---|---|
 | Timezone visibility to other participants | **Hidden** — each viewer sees proposed times in their own timezone only; no timezone labels shown to others |
-| Display names | **Auto-generated random nickname** (e.g. "Teal Fox", "Quick River"); user can re-roll to get a new one; no user-typed names |
+| Display names | **Auto-generated random nickname** (e.g. "Teal Fox", "Quick River"); fixed for session duration (re-roll dropped in MVP); no user-typed names |
 | Room access control | **Open always** — anyone with the code can join; 64B-combination passphrase is the access control |
 | Server-side logging | **Minimal operational only** — errors and anonymized connection events; no names, proposed times, or timezones persisted |
 | Reconnection authentication | **Server-issued session token** — stored in `sessionStorage`; reconnect sends token to reclaim slot; hijack-resistant |
@@ -53,12 +53,12 @@ Fri, 3:00 PM   ← in the viewer's own timezone
 
 Free-text display names lead users to enter real names, email handles, or workplace identifiers without realizing these are visible to all room members.
 
-**Decision:** Auto-generate an anonymous nickname on join (two-word animal/color combos or similar wordlist). User can tap "Re-roll" to get a new one. No free-text name entry. The auto-generated name exists only for the duration of the session.
+**Decision:** Auto-generate an anonymous nickname on join (two-word animal/color combos or similar wordlist). No free-text name entry. Nickname is fixed for the duration of the session — re-roll is dropped in MVP.
 
-**UX change required:** Replace the "Your display name:" text input with a nickname display + re-roll button:
+**UX change required:** Replace the "Your display name:" text input with a static nickname display:
 ```
 Your nickname this session:
-  Teal Fox  [🔀 New nickname]
+  Teal Fox
 ```
 
 ---
@@ -155,7 +155,7 @@ The following wireframe elements need updating based on these decisions:
 |---|---|---|
 | Proposals board participant label | `Sarah (EST)` | `Teal Fox` (nickname only, no timezone) |
 | Proposals board time display | Time in participant's TZ + TZ label | Time in **viewer's** TZ, no TZ label |
-| Join screen name input | Free text "Your display name:" | Auto-generated nickname + re-roll button |
+| Join screen name input | Free text "Your display name:" | Auto-generated nickname (static, no re-roll in MVP) |
 | Post lock-in export URL | No privacy note | Optional: "Sharing the time only — no names or locations" |
 | Join screen (any) | No privacy notice | One-line footer: "Nicknames and proposals exist only during the session." |
 
