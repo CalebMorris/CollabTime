@@ -4,7 +4,16 @@
 
 ## Setup
 
-After `npm install`, install the Playwright browser binary (one-time):
+```
+npm install
+npm run dev
+```
+
+The dev server URL will be printed in the terminal.
+
+### Screenshots
+
+Install the Playwright browser binary (one-time):
 
 ```
 npx playwright install chromium
@@ -47,6 +56,13 @@ Link that takes a user to [[Collab Time]] with a preconfigured timestamp selecte
 I am a general user trying to make sure I have my schedule aligned with an event. Sometimes when I see a particular date of an event, I get confused and mix up when it's actually happening when I convert to my time-zone.
 
 If I copy, or just type out, a specific timestamp with timezone, the website should attempt to parse it for usage in the conversion. If unable to parse there should be human-readable indications why it's not working.
+
+Supported input formats:
+- Natural language: `today at 8PM EST`, `tomorrow at 3pm`, `June 15 at noon`
+- ISO 8601: `2024-01-15T09:00:00Z`, `2024-01-15T09:00:00-05:00`
+- Unix timestamp (seconds or milliseconds): `1543392060`
+
+US timezone abbreviations (`EST`, `CST`, `MST`, `PST`) are treated as their current regional time — so `EST` entered during daylight saving time resolves to Eastern Daylight Time (UTC-4), matching how people actually write these abbreviations.
 
 ## Manual Selecting Time
 
