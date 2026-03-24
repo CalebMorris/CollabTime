@@ -6,7 +6,7 @@ import { setTimeout as sleep } from 'timers/promises'
 
 const PREVIEW_PORT = 4173
 const BASE_URL = `http://localhost:${PREVIEW_PORT}/CollabTime/`
-const OUTPUT_DIR = 'docs/screenshots'
+const OUTPUT_DIR = process.env.SCREENSHOT_DIR ?? 'docs/screenshots'
 const DEEP_LINK_TIMESTAMP_S = 1543392060   // 2018-11-28 ~00:01 UTC
 
 const FORM_FACTORS = [

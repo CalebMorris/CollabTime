@@ -16,21 +16,46 @@ chrono-node maps `EST`/`CST`/`MST`/`PST` to **fixed offsets** (e.g. EST = UTC-5 
 ## Commands
 
 ```
-npm run dev       # start dev server
-npm run build     # type-check + build
-npm run test      # run tests (watch mode)
-npm run lint      # eslint
-npm run coverage  # test coverage
+npm run dev           # start dev server
+npm run build         # type-check + build
+npm run test          # run tests (watch mode)
+npm run lint          # eslint
+npm run coverage      # test coverage
+npm run test:e2e      # Playwright integration tests (requires dev server on localhost:5173)
+npm run test:e2e:ui   # Playwright UI mode (for debugging)
 ```
 
 ## Conventions
 
 - Use `jq` instead of Python for parsing JSON in shell scripts or commands
 - Use descriptive variable names that convey context; avoid short single-word names (e.g. prefer `selectedTimezone` over `tz`, `parsedTimestamp` over `ts`)
+- Avoid abbreviated names for library/API objects (e.g. prefer `roomSocket`, `webSocket`, or `socket` over `ws`)
 
 ## Testing
 
 Use red-green TDD. Write a failing test first, then implement. Tests live alongside source files (`*.test.ts` / `*.test.tsx`).
+
+### E2E tests (Playwright)
+
+Tests live in `e2e/`. Three files:
+
+| File | Scope |
+|---|---|
+| `e2e/solo-mode.spec.ts` | Page load, text import, manual selector, timezone picker, export panel, deep links |
+| `e2e/party-overlays.spec.ts` | Create/join overlays — modal behaviour, validation, clipboard, focus trap |
+| `e2e/party-ws.spec.ts` | Party room flows — uses `page.routeWebSocket()` to mock the server, no live WS needed |
+
+**Prerequisites before running e2e tests:**
+
+1. Browser binaries must be installed (one-time): `npx playwright install`
+2. The dev server must be running: `npm run dev`
+3. Target URL is configurable via `BASE_URL` env var (default: `http://localhost:5173/CollabTime/`)
+
+**Clipboard tests** call `page.context().grantPermissions(['clipboard-read', 'clipboard-write'])` — this works in Chromium but is a no-op in WebKit/Firefox where the clipboard API behaves differently. Clipboard assertions are therefore most reliable on the `chromium` project.
+
+**Party-room WS tests** intercept the WebSocket via `page.routeWebSocket(/.*/)`. The handler receives a `WebSocketRoute` object with `ws.onopen`, `ws.onmessage`, `ws.send()`, and `ws.close()`. Message payloads must be JSON strings matching the protocol types in `src/room/roomProtocol.ts`.
+
+**Do not** add `vi.useFakeTimers()` to e2e tests — Playwright manages real browser time. Use `page.waitForTimeout()` sparingly (prefer `expect(...).toBeVisible({ timeout: N })` instead).
 
 ### Axe / accessibility tests
 
