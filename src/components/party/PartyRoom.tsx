@@ -9,6 +9,8 @@ import { RoomCodePill } from './RoomCodePill'
 import { NicknameDisplay } from './NicknameDisplay'
 import { ProposalsBoard } from './ProposalsBoard'
 import { ProposeCtaBar } from './ProposeCtaBar'
+import { ReconnectingBanner } from './ReconnectingBanner'
+import { LockInModal } from './LockInModal'
 
 interface Props {
   roomCode: string
@@ -38,9 +40,24 @@ export function PartyRoom({ roomCode, onLeave, socketFactory }: Props) {
   }
 
   const isConnected = room.connectionPhase === 'connected'
+  const isReconnecting = room.connectionPhase === 'reconnecting'
+  const isLockedIn = room.roomPhase === 'locked_in'
+  const [lockInDismissed, setLockInDismissed] = useState(false)
+  const showLockInModal = isLockedIn && !lockInDismissed && room.lockedEpochMs !== null
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col">
+    <div className={`min-h-screen bg-gray-950 text-gray-100 flex flex-col ${isReconnecting ? 'pt-[52px]' : ''}`}>
+      <ReconnectingBanner secondsRemaining={room.reconnectSecondsRemaining} />
+
+      {showLockInModal && (
+        <LockInModal
+          confirmedMs={room.lockedEpochMs!}
+          participantCount={room.participants.length}
+          timezone={timezone}
+          onDismiss={() => setLockInDismissed(true)}
+        />
+      )}
+
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-4 border-b border-gray-800 shrink-0">
         <div className="flex items-center gap-3">
