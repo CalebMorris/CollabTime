@@ -95,4 +95,12 @@ describe('useFocusTrap', () => {
     fireEvent.keyDown(document, { key: 'Space' })
     expect(onEscape).not.toHaveBeenCalled()
   })
+
+  it('Tab from single focusable element wraps back to itself', () => {
+    render(<SingleButtonDialog />)
+    expect(document.activeElement?.textContent).toBe('Only Button')
+
+    fireEvent.keyDown(document, { key: 'Tab', shiftKey: false })
+    expect(document.activeElement?.textContent).toBe('Only Button')
+  })
 })
