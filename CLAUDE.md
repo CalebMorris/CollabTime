@@ -45,6 +45,39 @@ Keep accessibility up to date alongside any UI/UX change:
 - Update ARIA roles, labels, and attributes when markup changes
 - Ensure keyboard navigation and focus order remain correct
 - Add or update `a11y.test.tsx` coverage for new/changed interactive elements
+- For motion effects (confetti, animations): **omit the element entirely** when `prefers-reduced-motion: reduce` — do not just hide it
+
+## Party System
+
+### Architecture
+
+Three layers — no router, no global state library:
+
+- **Layer 1** `src/room/` — pure TS WebSocket transport + protocol types (no React)
+- **Layer 2** `src/hooks/` — `useRoom` (WS state machine), `usePartyMode` (view routing)
+- **Layer 3** `src/components/party/` — all party UI components
+
+`AppMode` discriminated union in `App.tsx` drives view switching between solo and party screens. `useDeepLink` is **gated to solo mode only** (`appMode.kind === 'solo'`) — party mode manages its own URL state via `usePartyMode`.
+
+### State persistence
+
+`sessionStorage` keys are namespaced by `roomCode` to prevent stale-token collisions across rooms.
+
+### Product/UX decisions
+
+| Decision | Rule |
+|---|---|
+| Proposals board timezones | Viewer's own timezone only — **no TZ labels** on any row |
+| Dead room errors | Generic "Room not found" for all `ROOM_NOT_FOUND` errors — no oracle leakage |
+| Post lock-in export | **Nicknames only** — no timezone info shown |
+| Nickname re-roll | **Dropped from MVP** — auto-generated nickname is fixed for the session |
+| Lock-in modal | Auto-dismisses after 2500ms; tappable/clickable to skip early |
+
+### Testing: WebSocket hooks
+
+- `useRoom` accepts an injectable `socketFactory?: () => RoomSocket` parameter — avoids patching `globalThis.WebSocket`
+- In tests, pass a `FakeRoomSocket` with a `simulateMessage(msg)` helper
+- Use `vi.useFakeTimers()` for reconnect-countdown and auto-dismiss timing tests
 
 ## MVP Scope
 
