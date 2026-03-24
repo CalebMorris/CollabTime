@@ -2,6 +2,7 @@ import type { Proposal } from '../../room/roomProtocol'
 
 interface Props {
   proposals: Proposal[]
+  participantCount: number
 }
 
 function floorToMinute(epochMs: number): number {
@@ -18,8 +19,8 @@ function countAgreeing(proposals: Proposal[]): number {
   return Math.max(...counts.values())
 }
 
-export function ConsensusMeter({ proposals }: Props) {
-  const total = proposals.length
+export function ConsensusMeter({ proposals, participantCount }: Props) {
+  const total = participantCount
   const agreeing = countAgreeing(proposals)
   const ratio = total === 0 ? 0 : agreeing / total
   const allAgree = total > 0 && ratio === 1

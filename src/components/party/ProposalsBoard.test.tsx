@@ -65,6 +65,19 @@ describe('ProposalsBoard', () => {
     expect(screen.queryByText(/waiting for others/i)).toBeNull()
   })
 
+  it('shows "0 of 2 agree" when 2 connected participants but no proposals', () => {
+    render(
+      <ProposalsBoard
+        participants={[p1, p2]}
+        proposals={[]}
+        ownParticipantToken="pt-1"
+        viewerTimezone={TIMEZONE}
+        isLocked={false}
+      />,
+    )
+    expect(screen.getByText(/0 of 2 agree/i)).toBeDefined()
+  })
+
   it('renders ConsensusMeter', () => {
     const proposals: Proposal[] = [{ participantToken: 'pt-1', epochMs: EPOCH_MS }]
     render(

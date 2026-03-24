@@ -18,6 +18,7 @@ export function ProposalsBoard({
   isLocked,
 }: Props) {
   const proposalByToken = new Map(proposals.map((p) => [p.participantToken, p]))
+  const connectedCount = participants.filter((p) => p.isConnected).length
   // Only connected participants' proposals count toward consensus
   const activeProposals = proposals.filter((p) => {
     const participant = participants.find((pt) => pt.participantToken === p.participantToken)
@@ -57,7 +58,7 @@ export function ProposalsBoard({
         </p>
       )}
 
-      <ConsensusMeter proposals={activeProposals} />
+      <ConsensusMeter proposals={activeProposals} participantCount={connectedCount} />
     </section>
   )
 }

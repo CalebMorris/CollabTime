@@ -237,13 +237,14 @@ describe('Accessibility: party system components', () => {
           { participantToken: 'pt-1', epochMs: FIXED_MS },
           { participantToken: 'pt-2', epochMs: FIXED_MS + 60_000 },
         ]}
+        participantCount={2}
       />,
     )
     expect(await axe(container)).toHaveNoViolations()
   })
 
   it('ConsensusMeter — full agreement', async () => {
-    const { container } = render(<ConsensusMeter proposals={PROPOSALS} />)
+    const { container } = render(<ConsensusMeter proposals={PROPOSALS} participantCount={PROPOSALS.length} />)
     expect(await axe(container)).toHaveNoViolations()
   })
 
