@@ -32,6 +32,10 @@ npm run coverage  # test coverage
 
 Use red-green TDD. Write a failing test first, then implement. Tests live alongside source files (`*.test.ts` / `*.test.tsx`).
 
+### Axe / accessibility tests
+
+Never use `vi.useFakeTimers()` in the same test as `axe()` — fake timers block axe's internal async machinery, causing a 5s timeout and cascading "axe is already running" failures in all subsequent tests. Test timing behaviour in separate non-axe tests.
+
 ### Timezone parsing tests
 
 For any test involving a timezone abbreviation in natural language input, always cover:
@@ -46,6 +50,10 @@ Keep accessibility up to date alongside any UI/UX change:
 - Ensure keyboard navigation and focus order remain correct
 - Add or update `a11y.test.tsx` coverage for new/changed interactive elements
 - For motion effects (confetti, animations): **omit the element entirely** when `prefers-reduced-motion: reduce` — do not just hide it
+- `role="progressbar"` must have an accessible name — add `aria-label`, `aria-labelledby`, or `title`; axe will fail without one
+- `aria-live` is invalid on `<button>` elements — place it on a non-interactive sibling `<span>` or `<div>`; screen readers may silently ignore it on interactive elements
+- Modal dialogs (`role="dialog"` / `role="alertdialog"`) require: (1) focus moved into dialog on open, (2) Tab cycles within dialog only (focus trap), (3) Escape key closes and returns focus to the trigger
+- Tailwind's `animate-pulse` is **not** guarded by `prefers-reduced-motion` — use `motion-safe:animate-pulse` or a custom CSS animation with a `@media (prefers-reduced-motion: reduce)` guard
 
 ## Party System
 
@@ -73,11 +81,18 @@ Three layers — no router, no global state library:
 | Nickname re-roll | **Dropped from MVP** — auto-generated nickname is fixed for the session |
 | Lock-in modal | Auto-dismisses after 2500ms; tappable/clickable to skip early |
 
+### Server protocol notes
+
+- `join` **always creates** a new room if the code doesn't exist — `ROOM_NOT_FOUND` does **not** fire for fresh room codes. It only fires when joining a locked or expired room, or when a `rejoin` fails (e.g. token expired). There is no way to "check if a room exists" from the client.
+- `room_activated` carries a full participant snapshot in `msg.participants` — update the full participants array when handling this message, not just the `roomPhase` field.
+- Server may omit optional fields entirely (send `undefined`) rather than `null` — use loose `!= null` checks when filtering optional fields like `proposalEpochMs`.
+
 ### Testing: WebSocket hooks
 
 - `useRoom` accepts an injectable `socketFactory?: () => RoomSocket` parameter — avoids patching `globalThis.WebSocket`
 - In tests, pass a `FakeRoomSocket` with a `simulateMessage(msg)` helper
 - Use `vi.useFakeTimers()` for reconnect-countdown and auto-dismiss timing tests
+- Each `openConnection()` call captures `let thisSocket` before defining the callback object. All callbacks guard with `if (socketRef.current !== thisSocket) return` to prevent stale sockets (e.g. from React StrictMode double-invoke) from clobbering live state. The cleanup effect resets to `INITIAL_STATE` so that StrictMode remounts can reconnect cleanly.
 
 ## MVP Scope
 
