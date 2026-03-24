@@ -13,6 +13,9 @@ import { CoordinateSection } from './components/party/CoordinateSection'
 import { PartyCreateOverlay } from './components/party/PartyCreateOverlay'
 import { PartyJoinOverlay } from './components/party/PartyJoinOverlay'
 import { PartyRoom } from './components/party/PartyRoom'
+import { PartyExportScreen } from './components/party/PartyExportScreen'
+import { PartyDeadRoom } from './components/party/PartyDeadRoom'
+import type { Participant } from './room/roomProtocol'
 import { getAllFormats } from './utils/discordTimestamp'
 import { generateRoomCode } from './utils/partyLink'
 
@@ -23,10 +26,12 @@ function App() {
   const [timezonePickerOpen, setTimezonePickerOpen] = useState(false)
   const resultRef = useRef<HTMLElement | null>(null)
   const timezonePickerRef = useRef<HTMLDivElement | null>(null)
-  const { appMode, startParty, joinParty, enterRoom, backToSolo } = usePartyMode()
+  const { appMode, startParty, joinParty, enterRoom, lockIn, deadRoom, backToSolo } = usePartyMode()
   const isSoloMode = appMode.kind === 'solo'
   // Fresh room code generated each time the create overlay is opened
   const [pendingRoomCode, setPendingRoomCode] = useState(() => generateRoomCode())
+  // Participants captured from the room at lock-in time (not available from deep-link)
+  const [lockedParticipants, setLockedParticipants] = useState<Participant[]>([])
 
   const handleStartParty = () => {
     setPendingRoomCode(generateRoomCode())
@@ -64,6 +69,34 @@ function App() {
       <PartyRoom
         roomCode={appMode.roomCode}
         onLeave={backToSolo}
+        onLockIn={(confirmedMs, participants) => {
+          setLockedParticipants(participants)
+          lockIn(appMode.roomCode, confirmedMs)
+        }}
+        onDeadRoom={(code) => deadRoom(code)}
+      />
+    )
+  }
+
+  if (appMode.kind === 'party-locked') {
+    return (
+      <PartyExportScreen
+        confirmedMs={appMode.confirmedMs}
+        participants={lockedParticipants}
+        timezone={timezone}
+        onNewSession={handleStartParty}
+        onBackToSolo={backToSolo}
+      />
+    )
+  }
+
+  if (appMode.kind === 'party-dead') {
+    return (
+      <PartyDeadRoom
+        attemptedCode={appMode.attemptedCode}
+        onTryDifferent={(code) => joinParty(code)}
+        onStartNew={handleStartParty}
+        onBackToSolo={backToSolo}
       />
     )
   }

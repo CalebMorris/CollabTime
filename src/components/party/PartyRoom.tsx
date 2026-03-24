@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { RoomSocketFactory } from '../../room/RoomSocket'
+import type { Participant } from '../../room/roomProtocol'
 import { useRoom } from '../../hooks/useRoom'
 import { useTimezone } from '../../hooks/useTimezone'
 import { useKeyboardInset } from '../../hooks/useKeyboardInset'
@@ -15,10 +16,12 @@ import { LockInModal } from './LockInModal'
 interface Props {
   roomCode: string
   onLeave: () => void
+  onLockIn?: (confirmedMs: number, participants: Participant[]) => void
+  onDeadRoom?: (roomCode: string) => void
   socketFactory?: RoomSocketFactory
 }
 
-export function PartyRoom({ roomCode, onLeave, socketFactory }: Props) {
+export function PartyRoom({ roomCode, onLeave, onLockIn, onDeadRoom, socketFactory }: Props) {
   const room = useRoom(roomCode, socketFactory)
   const { timezone } = useTimezone()
   const keyboardInset = useKeyboardInset()
@@ -44,6 +47,22 @@ export function PartyRoom({ roomCode, onLeave, socketFactory }: Props) {
   const isLockedIn = room.roomPhase === 'locked_in'
   const [lockInDismissed, setLockInDismissed] = useState(false)
   const showLockInModal = isLockedIn && !lockInDismissed && room.lockedEpochMs !== null
+
+  // Transition to export screen after modal is dismissed
+  useEffect(() => {
+    if (lockInDismissed && room.lockedEpochMs !== null) {
+      onLockIn?.(room.lockedEpochMs, room.participants)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lockInDismissed])
+
+  // Transition to dead room on ROOM_NOT_FOUND
+  useEffect(() => {
+    if (room.errorCode === 'ROOM_NOT_FOUND') {
+      onDeadRoom?.(roomCode)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room.errorCode])
 
   return (
     <div className={`min-h-screen bg-gray-950 text-gray-100 flex flex-col ${isReconnecting ? 'pt-[52px]' : ''}`}>
