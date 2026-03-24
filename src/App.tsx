@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { useTimezone } from './hooks/useTimezone'
 import { useDeepLink } from './hooks/useDeepLink'
+import { usePartyMode } from './hooks/usePartyMode'
 import { TextImport } from './components/TextImport'
 import { ManualSelector } from './components/ManualSelector'
 import { ConversionDisplay } from './components/ConversionDisplay'
@@ -17,6 +18,8 @@ function App() {
   const [timezonePickerOpen, setTimezonePickerOpen] = useState(false)
   const resultRef = useRef<HTMLElement | null>(null)
   const timezonePickerRef = useRef<HTMLDivElement | null>(null)
+  const { appMode } = usePartyMode()
+  const isSoloMode = appMode.kind === 'solo'
 
   useEffect(() => {
     if (!timezonePickerOpen) return
@@ -35,7 +38,7 @@ function App() {
     setImportText(preview)
   }
 
-  useDeepLink(handleDeepLinkLoad, timestamp)
+  useDeepLink(handleDeepLinkLoad, timestamp, isSoloMode)
 
   const handleSetTimestamp = (ms: number) => {
     setTimestamp(ms)

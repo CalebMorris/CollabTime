@@ -47,4 +47,23 @@ describe('useDeepLink', () => {
     renderHook(() => useDeepLink(() => {}, null))
     expect(history.replaceState).not.toHaveBeenCalled()
   })
+
+  it('does not call onLoad when enabled is false, even with ?t= present', () => {
+    Object.defineProperty(window, 'location', {
+      value: { ...originalLocation, search: '?t=1543392060' },
+      configurable: true,
+    })
+    const onLoad = vi.fn()
+    renderHook(() => useDeepLink(onLoad, null, false))
+    expect(onLoad).not.toHaveBeenCalled()
+  })
+
+  it('does not call history.replaceState when enabled is false, even with a timestamp', () => {
+    Object.defineProperty(window, 'location', {
+      value: { ...originalLocation, search: '' },
+      configurable: true,
+    })
+    renderHook(() => useDeepLink(() => {}, 1543392060000, false))
+    expect(history.replaceState).not.toHaveBeenCalled()
+  })
 })
