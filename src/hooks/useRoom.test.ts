@@ -163,6 +163,32 @@ describe('useRoom — joined message', () => {
     expect(sessionStorage.getItem(`collabtime:participant:${ROOM_CODE}`)).toBe('part-def')
   })
 
+  it('excludes participants with missing proposalEpochMs from proposals', () => {
+    // Server may omit proposalEpochMs entirely (undefined) rather than sending null.
+    // Strict !== null passes undefined through, producing an invalid Proposal.
+    const { factory, latest } = makeFactory()
+    const { result } = renderHook(() => useRoom(ROOM_CODE, factory))
+    act(() => result.current.connect())
+    act(() => latest().simulateOpen())
+    act(() => latest().simulateMessage({
+      type: 'joined',
+      sessionToken: 'sess-abc',
+      participantToken: 'part-def',
+      nickname: 'Teal Fox',
+      protocolVersion: '1.0',
+      room: {
+        code: ROOM_CODE,
+        state: 'waiting',
+        // proposalEpochMs field absent entirely (undefined when accessed)
+        participants: [
+          { participantToken: 'part-def', nickname: 'Teal Fox', isConnected: true } as never,
+        ],
+        lockedInEpochMs: null,
+      },
+    }))
+    expect(result.current.proposals).toHaveLength(0)
+  })
+
   it('populates existing proposals from the room snapshot', () => {
     const { factory, latest } = makeFactory()
     const { result } = renderHook(() => useRoom(ROOM_CODE, factory))

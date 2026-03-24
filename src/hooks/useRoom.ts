@@ -169,7 +169,7 @@ export function useRoom(
         saveSessionToken(roomCode, msg.sessionToken)
         saveParticipantToken(roomCode, msg.participantToken)
         const proposals: Proposal[] = msg.room.participants
-          .filter((p) => p.proposalEpochMs !== null)
+          .filter((p) => p.proposalEpochMs != null)
           .map((p) => ({ participantToken: p.participantToken, epochMs: p.proposalEpochMs! }))
         setState((s) => ({
           ...s,

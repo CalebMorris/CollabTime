@@ -1,8 +1,10 @@
 import { useEffect } from 'react'
 import type { RoomSocketFactory } from '../../room/RoomSocket'
 import { useRoom } from '../../hooks/useRoom'
+import { useTimezone } from '../../hooks/useTimezone'
 import { RoomCodePill } from './RoomCodePill'
 import { NicknameDisplay } from './NicknameDisplay'
+import { ProposalsBoard } from './ProposalsBoard'
 
 interface Props {
   roomCode: string
@@ -12,6 +14,7 @@ interface Props {
 
 export function PartyRoom({ roomCode, onLeave, socketFactory }: Props) {
   const room = useRoom(roomCode, socketFactory)
+  const { timezone } = useTimezone()
 
   // Connect on mount
   useEffect(() => {
@@ -38,13 +41,31 @@ export function PartyRoom({ roomCode, onLeave, socketFactory }: Props) {
         </button>
       </header>
 
-      {/* Connection status */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-4 p-8">
-        <ConnectionStatus phase={room.connectionPhase} />
-        {room.ownNickname && <NicknameDisplay nickname={room.ownNickname} />}
-        {room.errorCode && (
-          <p className="text-sm text-red-400">Error: {room.errorCode}</p>
+      {/* Body */}
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+
+        {/* Proposals column */}
+        {room.connectionPhase === 'connected' && (
+          <aside className="md:w-72 md:flex-shrink-0 overflow-y-auto border-b md:border-b-0 md:border-r border-gray-800 p-4">
+            <ProposalsBoard
+              participants={room.participants}
+              proposals={room.proposals}
+              ownParticipantToken={room.ownParticipantToken}
+              viewerTimezone={timezone}
+              isLocked={room.roomPhase === 'locked_in'}
+            />
+          </aside>
         )}
+
+        {/* Main area */}
+        <div className="flex-1 flex flex-col items-center justify-center gap-4 p-8">
+          <ConnectionStatus phase={room.connectionPhase} />
+          {room.ownNickname && <NicknameDisplay nickname={room.ownNickname} />}
+          {room.errorCode && (
+            <p className="text-sm text-red-400">Error: {room.errorCode}</p>
+          )}
+        </div>
+
       </div>
     </div>
   )
