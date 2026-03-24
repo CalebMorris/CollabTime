@@ -35,6 +35,8 @@ npm run test:e2e:ui   # Playwright UI mode (for debugging)
 
 Use red-green TDD. Write a failing test first, then implement. Tests live alongside source files (`*.test.ts` / `*.test.tsx`).
 
+Vitest is configured with `exclude: ['**/e2e/**']` in `vite.config.ts` to prevent Playwright spec files from being picked up by the unit test runner.
+
 ### E2E tests (Playwright)
 
 Tests live in `e2e/`. Three files:
@@ -53,7 +55,16 @@ Tests live in `e2e/`. Three files:
 
 **Clipboard tests** call `page.context().grantPermissions(['clipboard-read', 'clipboard-write'])` — this works in Chromium but is a no-op in WebKit/Firefox where the clipboard API behaves differently. Clipboard assertions are therefore most reliable on the `chromium` project.
 
-**Party-room WS tests** intercept the WebSocket via `page.routeWebSocket(/.*/)`. The handler receives a `WebSocketRoute` object with `ws.onopen`, `ws.onmessage`, `ws.send()`, and `ws.close()`. Message payloads must be JSON strings matching the protocol types in `src/room/roomProtocol.ts`.
+**Party-room WS tests** intercept the WebSocket via `page.routeWebSocket(/.*/)`. The handler receives a `WebSocketRoute` object. Key API:
+- `wsRoute.onMessage(handler)` — receive messages sent by the page (method call, not property assignment)
+- `wsRoute.send(jsonString)` — push a server message to the page
+- `wsRoute.close()` — simulate a server-side disconnect
+
+Message payloads must be JSON strings matching the protocol types in `src/room/roomProtocol.ts`.
+
+**React StrictMode double-invoke:** In development, React double-invokes effects, which creates two WebSocket connections per room mount — the first is cleaned up immediately, the second is the live one. Always call the `serverWs$()` getter **after** `waitForRoomConnected` (not before) to receive the active connection. The `mockServer()` helper in `party-ws.spec.ts` handles this by tracking the most recently opened socket (`latestWs`), overwriting on each new connection.
+
+**Reconnect tests:** After `serverWs.close()`, the app immediately reconnects. To keep the "reconnecting" banner visible long enough to assert, set a `shouldRespond = false` flag before closing so the reconnect WS hangs without a response.
 
 **Do not** add `vi.useFakeTimers()` to e2e tests — Playwright manages real browser time. Use `page.waitForTimeout()` sparingly (prefer `expect(...).toBeVisible({ timeout: N })` instead).
 
@@ -78,6 +89,8 @@ Keep accessibility up to date alongside any UI/UX change:
 - `role="progressbar"` must have an accessible name — add `aria-label`, `aria-labelledby`, or `title`; axe will fail without one
 - `aria-live` is invalid on `<button>` elements — place it on a non-interactive sibling `<span>` or `<div>`; screen readers may silently ignore it on interactive elements
 - Modal dialogs (`role="dialog"` / `role="alertdialog"`) require: (1) focus moved into dialog on open, (2) Tab cycles within dialog only (focus trap), (3) Escape key closes and returns focus to the trigger
+- `LockInModal` uses `role="alertdialog"` — use `getByRole('alertdialog')` in tests, not `getByRole('dialog')`
+- The timezone picker (`TimezoneSelect`) uses `role="combobox"` for its search input — use `getByRole('combobox', { name: /search timezones/i })` in tests, not `[role="listbox"]`; the picker closes on click-outside only (no Escape handler)
 - Tailwind's `animate-pulse` is **not** guarded by `prefers-reduced-motion` — use `motion-safe:animate-pulse` or a custom CSS animation with a `@media (prefers-reduced-motion: reduce)` guard
 
 ## Party System
@@ -106,6 +119,13 @@ Three layers — no router, no global state library:
 | Nickname re-roll | **Dropped from MVP** — auto-generated nickname is fixed for the session |
 | Lock-in modal | Auto-dismisses after 2500ms; tappable/clickable to skip early |
 
+### URL parameters
+
+| Parameter | Format | Effect |
+|---|---|---|
+| `?code=<roomCode>` | `adjective-noun-noun` | Pre-fills join overlay (read-only); user taps [Join Party] to connect |
+| `?locked-in=<roomCode>&time=<epochMs>` | room code + Unix ms | Opens export screen directly with confirmed time |
+
 ### Server protocol notes
 
 - `join` **always creates** a new room if the code doesn't exist — `ROOM_NOT_FOUND` does **not** fire for fresh room codes. It only fires when joining a locked or expired room, or when a `rejoin` fails (e.g. token expired). There is no way to "check if a room exists" from the client.
@@ -118,6 +138,7 @@ Three layers — no router, no global state library:
 - In tests, pass a `FakeRoomSocket` with a `simulateMessage(msg)` helper
 - Use `vi.useFakeTimers()` for reconnect-countdown and auto-dismiss timing tests
 - Each `openConnection()` call captures `let thisSocket` before defining the callback object. All callbacks guard with `if (socketRef.current !== thisSocket) return` to prevent stale sockets (e.g. from React StrictMode double-invoke) from clobbering live state. The cleanup effect resets to `INITIAL_STATE` so that StrictMode remounts can reconnect cleanly.
+- The `ProposeCtaBar` button is only enabled when `roomPhase === 'active'`. E2E tests that need to click "Propose This Time" must join with `roomState: 'active'` (override available in the `joinedMsg()` helper in `party-ws.spec.ts`).
 
 ## MVP Scope
 
