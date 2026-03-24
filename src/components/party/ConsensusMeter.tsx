@@ -36,6 +36,7 @@ export function ConsensusMeter({ proposals }: Props) {
       </p>
       <div
         role="progressbar"
+        aria-label="Consensus"
         aria-valuenow={agreeing}
         aria-valuemin={0}
         aria-valuemax={total}
