@@ -90,32 +90,50 @@ export function useRoom(
 
     const factory = socketFactory ?? ((cb: RoomSocketCallbacks) => new RoomSocket(cb))
 
+    // Declared before callbacks so the closures can guard against stale socket events.
+    // A stale socket (e.g. from a React StrictMode double-invoke cleanup) may fire
+    // onClose/onError after a new socket has already been created — those callbacks
+    // must be ignored or they will null out socketRef and clobber the live socket.
+    let thisSocket: RoomSocket
+
     const callbacks: RoomSocketCallbacks = {
       onOpen: () => {
+        if (socketRef.current !== thisSocket) {
+          console.log('[useRoom] onOpen from stale socket — ignoring')
+          return
+        }
         const existingToken = loadSessionToken(roomCode)
         if (existingToken) {
-          socketRef.current?.send({
+          console.log('[useRoom] onOpen — sending rejoin for room:', roomCode)
+          socketRef.current.send({
             type: 'rejoin',
             roomCode,
             sessionToken: existingToken,
             protocolVersion: '1.0',
           })
         } else {
-          socketRef.current?.send({ type: 'join', roomCode, protocolVersion: '1.0' })
+          console.log('[useRoom] onOpen — sending join for room:', roomCode)
+          socketRef.current.send({ type: 'join', roomCode, protocolVersion: '1.0' })
         }
         setState((s) => ({ ...s, connectionPhase: 'joining' }))
       },
 
       onMessage: (msg: ServerMessage) => {
+        if (socketRef.current !== thisSocket) return
         handleMessage(msg)
       },
 
       onClose: () => {
+        if (socketRef.current !== thisSocket) {
+          console.log('[useRoom] onClose from stale socket — ignoring')
+          return
+        }
         socketRef.current = null
         const currentPhase = stateRef.current.connectionPhase
+        console.log('[useRoom] onClose — phase was:', currentPhase)
 
         if (currentPhase === 'connected') {
-          // Connection dropped while fully connected — attempt rejoin
+          console.log('[useRoom] onClose — was connected, attempting reconnect')
           setState((s) => ({
             ...s,
             connectionPhase: 'reconnecting',
@@ -128,14 +146,19 @@ export function useRoom(
       },
 
       onError: () => {
+        if (socketRef.current !== thisSocket) {
+          console.log('[useRoom] onError from stale socket — ignoring')
+          return
+        }
+        console.log('[useRoom] onError')
         socketRef.current = null
         setState((s) => ({ ...s, connectionPhase: 'connection_failed' }))
       },
     }
 
-    const socket = factory(callbacks)
-    socketRef.current = socket
-    socket.connect(import.meta.env.VITE_WS_URL ?? '')
+    thisSocket = factory(callbacks)
+    socketRef.current = thisSocket
+    thisSocket.connect(import.meta.env.VITE_WS_URL ?? '')
   }, [roomCode, socketFactory, setState])
 
   openConnectionRef.current = openConnection
@@ -249,18 +272,24 @@ export function useRoom(
     }
   }
 
-  // Cleanup on unmount
+  // Cleanup on unmount — also resets state so a remount (e.g. React StrictMode) can reconnect
   useEffect(() => {
     return () => {
+      console.log('[useRoom] cleanup — disconnecting and resetting state')
       socketRef.current?.disconnect()
       socketRef.current = null
+      setState(() => INITIAL_STATE)
     }
-  }, [])
+  }, [setState])
 
   // ─── Public actions ──────────────────────────────────────────────────────────
 
   const connect = useCallback(() => {
-    if (state.connectionPhase !== 'idle' && state.connectionPhase !== 'connection_failed') return
+    console.log('[useRoom] connect() called — current phase:', state.connectionPhase)
+    if (state.connectionPhase !== 'idle' && state.connectionPhase !== 'connection_failed') {
+      console.log('[useRoom] connect() blocked — phase is not idle/connection_failed')
+      return
+    }
     setState((s) => ({ ...s, connectionPhase: 'connecting' }))
     openConnectionRef.current()
   }, [state.connectionPhase, setState])

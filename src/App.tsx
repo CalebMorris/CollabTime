@@ -9,7 +9,12 @@ import { DiscordExport } from './components/DiscordExport'
 import { ShareLink } from './components/ShareLink'
 import { CalendarExport } from './components/CalendarExport'
 import { TimezoneSelect } from './components/TimezoneSelect'
+import { CoordinateSection } from './components/party/CoordinateSection'
+import { PartyCreateOverlay } from './components/party/PartyCreateOverlay'
+import { PartyJoinOverlay } from './components/party/PartyJoinOverlay'
+import { PartyRoom } from './components/party/PartyRoom'
 import { getAllFormats } from './utils/discordTimestamp'
+import { generateRoomCode } from './utils/partyLink'
 
 function App() {
   const { timezone, setTimezone } = useTimezone()
@@ -18,8 +23,15 @@ function App() {
   const [timezonePickerOpen, setTimezonePickerOpen] = useState(false)
   const resultRef = useRef<HTMLElement | null>(null)
   const timezonePickerRef = useRef<HTMLDivElement | null>(null)
-  const { appMode } = usePartyMode()
+  const { appMode, startParty, joinParty, enterRoom, backToSolo } = usePartyMode()
   const isSoloMode = appMode.kind === 'solo'
+  // Fresh room code generated each time the create overlay is opened
+  const [pendingRoomCode, setPendingRoomCode] = useState(() => generateRoomCode())
+
+  const handleStartParty = () => {
+    setPendingRoomCode(generateRoomCode())
+    startParty()
+  }
 
   useEffect(() => {
     if (!timezonePickerOpen) return
@@ -45,6 +57,15 @@ function App() {
     if (resultRef.current?.scrollIntoView) {
       resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
+  }
+
+  if (appMode.kind === 'party-room') {
+    return (
+      <PartyRoom
+        roomCode={appMode.roomCode}
+        onLeave={backToSolo}
+      />
+    )
   }
 
   return (
@@ -112,6 +133,8 @@ function App() {
             </h2>
             <ConversionDisplay timestamp={timestamp} timezone={timezone} />
           </section>
+
+          <CoordinateSection onStartParty={handleStartParty} onJoinParty={() => joinParty()} />
         </div>
 
         {/* Right column — slides in when a time is selected */}
@@ -135,6 +158,23 @@ function App() {
         )}
 
       </div>
+
+      {/* Party overlays — rendered on top of solo UI */}
+      {appMode.kind === 'party-create-overlay' && (
+        <PartyCreateOverlay
+          roomCode={pendingRoomCode}
+          onEnterRoom={() => enterRoom(pendingRoomCode)}
+          onDismiss={backToSolo}
+        />
+      )}
+
+      {appMode.kind === 'party-join-overlay' && (
+        <PartyJoinOverlay
+          initialCode={appMode.code}
+          onJoin={(code) => enterRoom(code)}
+          onDismiss={backToSolo}
+        />
+      )}
     </main>
   )
 }
