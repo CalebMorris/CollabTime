@@ -119,7 +119,10 @@ export function useRoom(
       },
 
       onMessage: (msg: ServerMessage) => {
-        if (socketRef.current !== thisSocket) return
+        if (socketRef.current !== thisSocket) {
+          console.log('[useRoom] onMessage from stale socket — ignoring', msg.type)
+          return
+        }
         handleMessage(msg)
       },
 
@@ -164,6 +167,7 @@ export function useRoom(
   openConnectionRef.current = openConnection
 
   function handleMessage(msg: ServerMessage) {
+    console.log('[useRoom] handleMessage', msg.type)
     switch (msg.type) {
       case 'joined': {
         saveSessionToken(roomCode, msg.sessionToken)
@@ -191,6 +195,7 @@ export function useRoom(
       }
 
       case 'participant_joined':
+        console.log('[useRoom] participant_joined — adding', msg.nickname, 'to', stateRef.current.participants.map(p => p.nickname))
         setState((s) => ({
           ...s,
           participants: [
@@ -201,7 +206,16 @@ export function useRoom(
         break
 
       case 'room_activated':
-        setState((s) => ({ ...s, roomPhase: 'active' }))
+        console.log('[useRoom] room_activated — participants:', msg.participants.map(p => p.nickname))
+        setState((s) => ({
+          ...s,
+          roomPhase: 'active',
+          participants: msg.participants.map((p) => ({
+            participantToken: p.participantToken,
+            nickname: p.nickname,
+            isConnected: true,
+          })),
+        }))
         break
 
       case 'room_deactivated':
@@ -235,6 +249,7 @@ export function useRoom(
         break
 
       case 'proposal_updated': {
+        console.log('[useRoom] proposal_updated — from', msg.participantToken, 'epoch', msg.epochMs)
         setState((s) => {
           const idx = s.proposals.findIndex((p) => p.participantToken === msg.participantToken)
           const updated: Proposal = { participantToken: msg.participantToken, epochMs: msg.epochMs }

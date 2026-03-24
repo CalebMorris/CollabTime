@@ -231,6 +231,20 @@ describe('useRoom — room state messages', () => {
     expect(result.current.roomPhase).toBe('active')
   })
 
+  it('replaces participants list with room_activated snapshot', () => {
+    const { factory, latest } = makeFactory()
+    const result = setupConnected(factory, latest)
+    act(() => latest().simulateMessage({
+      type: 'room_activated',
+      participants: [
+        { participantToken: 'part-def', nickname: 'Teal Fox' },
+        { participantToken: 'part-xyz', nickname: 'Azure Sloth' },
+      ],
+    }))
+    expect(result.current.participants).toHaveLength(2)
+    expect(result.current.participants.map(p => p.nickname)).toContain('Azure Sloth')
+  })
+
   it('sets roomPhase to waiting on room_deactivated', () => {
     const { factory, latest } = makeFactory()
     const result = setupConnected(factory, latest)

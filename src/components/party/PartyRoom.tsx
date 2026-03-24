@@ -1,10 +1,14 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import type { RoomSocketFactory } from '../../room/RoomSocket'
 import { useRoom } from '../../hooks/useRoom'
 import { useTimezone } from '../../hooks/useTimezone'
+import { useKeyboardInset } from '../../hooks/useKeyboardInset'
+import { TextImport } from '../TextImport'
+import { ManualSelector } from '../ManualSelector'
 import { RoomCodePill } from './RoomCodePill'
 import { NicknameDisplay } from './NicknameDisplay'
 import { ProposalsBoard } from './ProposalsBoard'
+import { ProposeCtaBar } from './ProposeCtaBar'
 
 interface Props {
   roomCode: string
@@ -15,6 +19,8 @@ interface Props {
 export function PartyRoom({ roomCode, onLeave, socketFactory }: Props) {
   const room = useRoom(roomCode, socketFactory)
   const { timezone } = useTimezone()
+  const keyboardInset = useKeyboardInset()
+  const [timestamp, setTimestamp] = useState<number | null>(null)
 
   // Connect on mount
   useEffect(() => {
@@ -27,11 +33,20 @@ export function PartyRoom({ roomCode, onLeave, socketFactory }: Props) {
     onLeave()
   }
 
+  const handlePropose = () => {
+    if (timestamp !== null) room.propose(timestamp)
+  }
+
+  const isConnected = room.connectionPhase === 'connected'
+
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
-        <RoomCodePill roomCode={roomCode} />
+      <header className="flex items-center justify-between px-6 py-4 border-b border-gray-800 shrink-0">
+        <div className="flex items-center gap-3">
+          <RoomCodePill roomCode={roomCode} />
+          {room.ownNickname && <NicknameDisplay nickname={room.ownNickname} />}
+        </div>
         <button
           onClick={handleLeave}
           aria-label="Leave room"
@@ -44,8 +59,8 @@ export function PartyRoom({ roomCode, onLeave, socketFactory }: Props) {
       {/* Body */}
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
 
-        {/* Proposals column */}
-        {room.connectionPhase === 'connected' && (
+        {/* Proposals column — left */}
+        {isConnected && (
           <aside className="md:w-72 md:flex-shrink-0 overflow-y-auto border-b md:border-b-0 md:border-r border-gray-800 p-4">
             <ProposalsBoard
               participants={room.participants}
@@ -57,16 +72,55 @@ export function PartyRoom({ roomCode, onLeave, socketFactory }: Props) {
           </aside>
         )}
 
-        {/* Main area */}
-        <div className="flex-1 flex flex-col items-center justify-center gap-4 p-8">
-          <ConnectionStatus phase={room.connectionPhase} />
-          {room.ownNickname && <NicknameDisplay nickname={room.ownNickname} />}
-          {room.errorCode && (
-            <p className="text-sm text-red-400">Error: {room.errorCode}</p>
+        {/* Center — time picker + status */}
+        <div className="flex-1 overflow-y-auto">
+          {!isConnected ? (
+            <div className="flex flex-col items-center justify-center gap-4 h-full p-8">
+              <ConnectionStatus phase={room.connectionPhase} />
+              {room.errorCode && (
+                <p className="text-sm text-red-400">Error: {room.errorCode}</p>
+              )}
+            </div>
+          ) : (
+            <div className="max-w-md mx-auto px-4 py-6 pb-24 flex flex-col gap-6">
+              <section aria-labelledby="party-pick-heading">
+                <h2
+                  id="party-pick-heading"
+                  className="text-xs font-semibold tracking-widest uppercase text-gray-400 mb-3"
+                >
+                  Pick a Time
+                </h2>
+                <div className="rounded-lg border border-gray-800 bg-gray-900 p-4 flex flex-col gap-4">
+                  <TextImport onTime={setTimestamp} externalValue={null} />
+                  <div className="flex items-center gap-3 text-xs text-gray-400">
+                    <div className="flex-1 border-t border-gray-800" />
+                    <span>or</span>
+                    <div className="flex-1 border-t border-gray-800" />
+                  </div>
+                  <ManualSelector timezone={timezone} onTime={setTimestamp} value={timestamp} />
+                </div>
+              </section>
+
+              {room.ownProposal && (
+                <p className="text-xs text-gray-500 text-center">
+                  Your current proposal is on the board. Pick a new time to update it.
+                </p>
+              )}
+            </div>
           )}
         </div>
 
       </div>
+
+      {/* Sticky propose CTA — only shown when connected */}
+      {isConnected && (
+        <ProposeCtaBar
+          timestamp={timestamp}
+          roomPhase={room.roomPhase}
+          keyboardInset={keyboardInset}
+          onPropose={handlePropose}
+        />
+      )}
     </div>
   )
 }

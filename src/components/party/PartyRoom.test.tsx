@@ -68,7 +68,7 @@ describe('PartyRoom', () => {
     expect(screen.getByText(/joining/i)).toBeDefined()
   })
 
-  it('shows connected state after joined message', () => {
+  it('shows the time picker after connected', () => {
     const { factory, getInstance } = makeFakeFactory()
     render(
       <PartyRoom
@@ -86,7 +86,7 @@ describe('PartyRoom', () => {
       protocolVersion: '1.0',
       room: { state: 'waiting', participants: [], lockedInEpochMs: null },
     })
-    expect(screen.getByText(/connected/i)).toBeDefined()
+    expect(screen.getByText(/pick a time/i)).toBeDefined()
   })
 
   it('displays own nickname once connected', () => {
