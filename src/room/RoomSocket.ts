@@ -1,6 +1,8 @@
 import { parseServerMessage } from './roomProtocol'
 import type { ClientMessage, ServerMessage } from './roomProtocol'
 
+export type RoomSocketFactory = (callbacks: RoomSocketCallbacks) => RoomSocket
+
 export interface RoomSocketCallbacks {
   onOpen: () => void
   onMessage: (msg: ServerMessage) => void
