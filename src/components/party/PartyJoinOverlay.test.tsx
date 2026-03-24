@@ -2,6 +2,41 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import { PartyJoinOverlay } from './PartyJoinOverlay'
 
+describe('PartyJoinOverlay — keyboard & validation', () => {
+  it('calls onDismiss when Escape is pressed', () => {
+    const onDismiss = vi.fn()
+    render(<PartyJoinOverlay initialCode={null} onJoin={vi.fn()} onDismiss={onDismiss} />)
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(onDismiss).toHaveBeenCalledOnce()
+  })
+
+  it('moves focus into the dialog on open', () => {
+    render(<PartyJoinOverlay initialCode={null} onJoin={vi.fn()} onDismiss={vi.fn()} />)
+    const dialog = screen.getByRole('dialog')
+    expect(dialog.contains(document.activeElement)).toBe(true)
+  })
+
+  it('shows a validation error when input has invalid format', () => {
+    render(<PartyJoinOverlay initialCode={null} onJoin={vi.fn()} onDismiss={vi.fn()} />)
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'notacode' } })
+    expect(screen.getByRole('alert')).toBeDefined()
+    expect(screen.getByText(/format/i)).toBeDefined()
+  })
+
+  it('hides the validation error when input becomes valid', () => {
+    render(<PartyJoinOverlay initialCode={null} onJoin={vi.fn()} onDismiss={vi.fn()} />)
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'notacode' } })
+    expect(screen.queryByRole('alert')).toBeDefined()
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'purple-falcon-bridge' } })
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
+
+  it('does not show a validation error when input is empty', () => {
+    render(<PartyJoinOverlay initialCode={null} onJoin={vi.fn()} onDismiss={vi.fn()} />)
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
+})
+
 describe('PartyJoinOverlay — default state', () => {
   it('has role="dialog" and aria-modal="true"', () => {
     render(<PartyJoinOverlay initialCode={null} onJoin={vi.fn()} onDismiss={vi.fn()} />)

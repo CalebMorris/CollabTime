@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { formatInTimezone } from '../../utils/formatTime'
 
 interface Props {
@@ -11,20 +11,36 @@ interface Props {
 const AUTO_DISMISS_MS = 2500
 
 export function LockInModal({ confirmedMs, participantCount, timezone, onDismiss }: Props) {
+  const dialogRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     const timer = setTimeout(onDismiss, AUTO_DISMISS_MS)
     return () => clearTimeout(timer)
+  }, [onDismiss])
+
+  useEffect(() => {
+    dialogRef.current?.focus()
+  }, [])
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onDismiss()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
   }, [onDismiss])
 
   const formattedTime = formatInTimezone(confirmedMs, timezone)
 
   return (
     <div
+      ref={dialogRef}
       role="alertdialog"
       aria-modal="true"
       aria-labelledby="lock-in-heading"
+      tabIndex={-1}
       onClick={onDismiss}
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gray-950/95 backdrop-blur-sm cursor-pointer animate-fade-in"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gray-950/95 backdrop-blur-sm cursor-pointer animate-fade-in focus:outline-none"
     >
       <div className="flex flex-col items-center gap-6 p-8 text-center max-w-sm">
         {/* Heading */}

@@ -103,4 +103,21 @@ describe('PartyCreateOverlay', () => {
     )
     expect(screen.getByText(/privacy/i)).toBeDefined()
   })
+
+  it('calls onDismiss when Escape is pressed', () => {
+    const onDismiss = vi.fn()
+    render(
+      <PartyCreateOverlay roomCode={ROOM_CODE} onEnterRoom={vi.fn()} onDismiss={onDismiss} />,
+    )
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(onDismiss).toHaveBeenCalledOnce()
+  })
+
+  it('moves focus into the dialog on open', () => {
+    render(
+      <PartyCreateOverlay roomCode={ROOM_CODE} onEnterRoom={vi.fn()} onDismiss={vi.fn()} />,
+    )
+    const dialog = screen.getByRole('dialog')
+    expect(dialog.contains(document.activeElement)).toBe(true)
+  })
 })

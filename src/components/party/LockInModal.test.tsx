@@ -2,6 +2,39 @@ import { render, screen, fireEvent, act } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { LockInModal } from './LockInModal'
 
+// 2024-03-23 16:00:00 UTC = 12:00 PM EDT — shared by all describe blocks
+const _EPOCH_MS = 1711209600000
+const _TIMEZONE = 'America/New_York'
+
+describe('LockInModal — keyboard', () => {
+  it('calls onDismiss when Escape is pressed', () => {
+    const onDismiss = vi.fn()
+    render(
+      <LockInModal
+        confirmedMs={_EPOCH_MS}
+        participantCount={2}
+        timezone={_TIMEZONE}
+        onDismiss={onDismiss}
+      />,
+    )
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(onDismiss).toHaveBeenCalledOnce()
+  })
+
+  it('dialog element receives focus on mount', () => {
+    render(
+      <LockInModal
+        confirmedMs={_EPOCH_MS}
+        participantCount={2}
+        timezone={_TIMEZONE}
+        onDismiss={vi.fn()}
+      />,
+    )
+    const dialog = screen.getByRole('alertdialog')
+    expect(document.activeElement).toBe(dialog)
+  })
+})
+
 // 2024-03-23 16:00:00 UTC = 12:00 PM EDT
 const EPOCH_MS = 1711209600000
 const TIMEZONE = 'America/New_York'

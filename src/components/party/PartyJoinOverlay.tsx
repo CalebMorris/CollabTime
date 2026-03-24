@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { useFocusTrap } from '../../hooks/useFocusTrap'
 
 const ROOM_CODE_RE = /^[a-z]+-[a-z]+-[a-z]+$/
 
@@ -12,6 +13,10 @@ export function PartyJoinOverlay({ initialCode, onJoin, onDismiss }: Props) {
   const [inputValue, setInputValue] = useState(initialCode ?? '')
   const isPreFilled = initialCode !== null
   const isValid = ROOM_CODE_RE.test(inputValue)
+  const showError = inputValue.length > 0 && !isValid
+
+  const dialogRef = useRef<HTMLDivElement>(null)
+  useFocusTrap(dialogRef, onDismiss)
 
   const handleSubmit = () => {
     if (isValid) onJoin(inputValue)
@@ -28,6 +33,7 @@ export function PartyJoinOverlay({ initialCode, onJoin, onDismiss }: Props) {
 
       {/* Dialog */}
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="join-overlay-title"
@@ -55,9 +61,24 @@ export function PartyJoinOverlay({ initialCode, onJoin, onDismiss }: Props) {
           spellCheck={false}
           inputMode="url"
           aria-label="Party room code"
-          aria-invalid={inputValue.length > 0 && !isValid}
-          className="min-h-[44px] w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm font-mono text-gray-100 placeholder-gray-500 mb-4 focus:outline-none focus:border-indigo-500"
+          aria-invalid={showError}
+          aria-describedby={showError ? 'code-error' : undefined}
+          className="min-h-[44px] w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm font-mono text-gray-100 placeholder-gray-500 mb-1 focus:outline-none focus:border-indigo-500"
         />
+
+        {/* Inline validation error */}
+        {showError && (
+          <p
+            id="code-error"
+            role="alert"
+            className="text-xs text-red-400 mb-3"
+          >
+            Format: word-word-word (three lowercase words)
+          </p>
+        )}
+
+        {/* Spacer to keep layout stable when no error */}
+        {!showError && <div className="mb-3" />}
 
         {/* Join CTA */}
         <button

@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { useFocusTrap } from '../../hooks/useFocusTrap'
 import { encodePartyRoomUrl } from '../../utils/partyLink'
 
 interface Props {
@@ -10,6 +11,8 @@ interface Props {
 export function PartyCreateOverlay({ roomCode, onEnterRoom, onDismiss }: Props) {
   const [codeCopied, setCodeCopied] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
+  const dialogRef = useRef<HTMLDivElement>(null)
+  useFocusTrap(dialogRef, onDismiss)
 
   const partyUrl = `${window.location.origin}${window.location.pathname}${encodePartyRoomUrl(roomCode)}`
 
@@ -38,6 +41,7 @@ export function PartyCreateOverlay({ roomCode, onEnterRoom, onDismiss }: Props) 
 
       {/* Dialog */}
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="create-overlay-title"
