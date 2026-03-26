@@ -51,6 +51,13 @@ export function decodeLockedInParams(
   return { roomCode, epochMs }
 }
 
+// ─── Feature flags ────────────────────────────────────────────────────────────
+
+/** Returns true when the `enablePartyMode` query param is present in the URL. */
+export function isPartyModeEnabled(search: string): boolean {
+  return new URLSearchParams(search).has('enablePartyMode')
+}
+
 // ─── Initial mode detection (called once on App mount) ────────────────────────
 
 export function detectInitialMode(search: string): AppMode {

@@ -8,6 +8,7 @@ import {
   encodePartyLockedUrl,
   decodeLockedInParams,
   detectInitialMode,
+  isPartyModeEnabled,
 } from './appUrl'
 
 // ─── ROOM_CODE_RE ─────────────────────────────────────────────────────────────
@@ -145,6 +146,21 @@ describe('decodeLockedInParams', () => {
 })
 
 // ─── detectInitialMode ────────────────────────────────────────────────────────
+
+describe('isPartyModeEnabled', () => {
+  it('returns true when enablePartyMode param is present', () => {
+    expect(isPartyModeEnabled('?enablePartyMode')).toBe(true)
+  })
+
+  it('returns true when enablePartyMode has a value', () => {
+    expect(isPartyModeEnabled('?enablePartyMode=true')).toBe(true)
+  })
+
+  it('returns false when enablePartyMode param is absent', () => {
+    expect(isPartyModeEnabled('')).toBe(false)
+    expect(isPartyModeEnabled('?time=12345')).toBe(false)
+  })
+})
 
 describe('detectInitialMode', () => {
   it('returns solo for an empty search string', () => {

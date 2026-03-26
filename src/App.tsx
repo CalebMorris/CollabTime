@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from 'react'
+import { HelpCircle } from 'lucide-react'
 import { useTimezone } from './hooks/useTimezone'
 import { useDeepLink } from './hooks/useDeepLink'
 import { usePartyMode } from './hooks/usePartyMode'
@@ -15,9 +16,11 @@ import { PartyJoinOverlay } from './components/party/PartyJoinOverlay'
 import { PartyRoom } from './components/party/PartyRoom'
 import { PartyExportScreen } from './components/party/PartyExportScreen'
 import { PartyDeadRoom } from './components/party/PartyDeadRoom'
+import { HelpOverlay } from './components/HelpOverlay'
 import type { Participant } from './room/roomProtocol'
 import { getAllFormats } from './utils/discordTimestamp'
 import { generateRoomCode } from './utils/partyLink'
+import { isPartyModeEnabled } from './utils/appUrl'
 import { loadLockedParticipants } from './room/roomSession'
 
 function App() {
@@ -25,6 +28,7 @@ function App() {
   const [timestamp, setTimestamp] = useState<number | null>(null)
   const [importText, setImportText] = useState<string | null>(null)
   const [timezonePickerOpen, setTimezonePickerOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
   const resultRef = useRef<HTMLElement | null>(null)
   const timezonePickerRef = useRef<HTMLDivElement | null>(null)
   const { appMode, startParty, joinParty, enterRoom, lockIn, deadRoom, backToSolo } = usePartyMode()
@@ -113,6 +117,14 @@ function App() {
     <main className="min-h-screen bg-gray-950 text-gray-100 overflow-x-hidden">
       <header className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
         <h1 className="text-lg font-bold tracking-tight">CollabTime</h1>
+        <div className="flex items-center gap-2">
+        <button
+          aria-label="Help"
+          onClick={() => setHelpOpen(true)}
+          className="rounded-full border border-gray-700 bg-gray-900 p-2 text-gray-400 hover:text-gray-100 hover:border-gray-600"
+        >
+          <HelpCircle size={16} aria-hidden="true" />
+        </button>
         <div className="relative" ref={timezonePickerRef}>
           <button
             aria-haspopup="listbox"
@@ -136,6 +148,7 @@ function App() {
               />
             </div>
           )}
+        </div>
         </div>
       </header>
 
@@ -214,6 +227,13 @@ function App() {
           initialCode={appMode.code}
           onJoin={(code) => enterRoom(code)}
           onDismiss={backToSolo}
+        />
+      )}
+
+      {helpOpen && (
+        <HelpOverlay
+          onDismiss={() => setHelpOpen(false)}
+          partyModeEnabled={isPartyModeEnabled(window.location.search)}
         />
       )}
     </main>
