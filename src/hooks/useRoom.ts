@@ -95,6 +95,10 @@ export function useRoom(
     // onClose/onError after a new socket has already been created — those callbacks
     // must be ignored or they will null out socketRef and clobber the live socket.
     let thisSocket: RoomSocket
+    // Tracks whether onOpen sent a rejoin (vs a fresh join). Used by onClose to
+    // decide whether a drop during the joining phase should trigger a reconnect:
+    // a rejoin failure is worth retrying (session still valid); a fresh join failure is not.
+    let isRejoinAttempt = false
 
     const callbacks: RoomSocketCallbacks = {
       onOpen: () => {
@@ -104,6 +108,7 @@ export function useRoom(
         }
         const existingToken = loadSessionToken(roomCode)
         if (existingToken) {
+          isRejoinAttempt = true
           console.log('[useRoom] onOpen — sending rejoin for room:', roomCode)
           socketRef.current.send({
             type: 'rejoin',
@@ -133,10 +138,10 @@ export function useRoom(
         }
         socketRef.current = null
         const currentPhase = stateRef.current.connectionPhase
-        console.log('[useRoom] onClose — phase was:', currentPhase)
+        console.log('[useRoom] onClose — phase was:', currentPhase, '| isRejoinAttempt:', isRejoinAttempt)
 
-        if (currentPhase === 'connected') {
-          console.log('[useRoom] onClose — was connected, attempting reconnect')
+        if (currentPhase === 'connected' || (currentPhase === 'joining' && isRejoinAttempt)) {
+          console.log('[useRoom] onClose — was connected or rejoin mid-handshake, attempting reconnect')
           setState((s) => ({
             ...s,
             connectionPhase: 'reconnecting',

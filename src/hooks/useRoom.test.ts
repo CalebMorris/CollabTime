@@ -418,9 +418,22 @@ describe('useRoom — self reconnect (onClose)', () => {
     const { result } = renderHook(() => useRoom(ROOM_CODE, factory))
     act(() => result.current.connect())
     act(() => latest().simulateOpen())
-    // Close before joined message arrives
+    // Close before joined message arrives — fresh join, no session token
     act(() => latest().simulateClose())
     expect(result.current.connectionPhase).toBe('connection_failed')
+  })
+
+  it('enters reconnecting when socket closes during joining with an existing session token (rejoin path)', () => {
+    saveSessionToken(ROOM_CODE, 'existing-token')
+    const { factory, sockets, latest } = makeFactory()
+    const { result } = renderHook(() => useRoom(ROOM_CODE, factory))
+    act(() => result.current.connect())
+    act(() => latest().simulateOpen())
+    // Close before joined message arrives — we sent a rejoin so should retry
+    act(() => latest().simulateClose())
+    expect(result.current.connectionPhase).toBe('reconnecting')
+    // A new socket should have been opened immediately
+    expect(sockets).toHaveLength(2)
   })
 })
 
