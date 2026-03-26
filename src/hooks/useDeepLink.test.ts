@@ -14,9 +14,9 @@ describe('useDeepLink', () => {
     Object.defineProperty(window, 'location', { value: originalLocation, configurable: true })
   })
 
-  it('calls onLoad with ms when ?t= is present on mount', () => {
+  it('calls onLoad with ms when ?time= is present on mount', () => {
     Object.defineProperty(window, 'location', {
-      value: { ...originalLocation, search: '?t=1543392060' },
+      value: { ...originalLocation, search: '?time=1543392060' },
       configurable: true,
     })
     const onLoad = vi.fn()
@@ -24,7 +24,7 @@ describe('useDeepLink', () => {
     expect(onLoad).toHaveBeenCalledWith(1543392060000)
   })
 
-  it('does not call onLoad when ?t= is absent', () => {
+  it('does not call onLoad when ?time= is absent', () => {
     Object.defineProperty(window, 'location', {
       value: { ...originalLocation, search: '' },
       configurable: true,
@@ -40,11 +40,30 @@ describe('useDeepLink', () => {
       configurable: true,
     })
     renderHook(() => useDeepLink(() => {}, 1543392060000))
-    expect(history.replaceState).toHaveBeenCalledWith(null, '', '?t=1543392060')
+    expect(history.replaceState).toHaveBeenCalledWith(null, '', '?time=1543392060')
   })
 
   it('does not call history.replaceState when timestamp is null', () => {
     renderHook(() => useDeepLink(() => {}, null))
+    expect(history.replaceState).not.toHaveBeenCalled()
+  })
+
+  it('does not call onLoad when enabled is false, even with ?t= present', () => {
+    Object.defineProperty(window, 'location', {
+      value: { ...originalLocation, search: '?time=1543392060' },
+      configurable: true,
+    })
+    const onLoad = vi.fn()
+    renderHook(() => useDeepLink(onLoad, null, false))
+    expect(onLoad).not.toHaveBeenCalled()
+  })
+
+  it('does not call history.replaceState when enabled is false, even with a timestamp', () => {
+    Object.defineProperty(window, 'location', {
+      value: { ...originalLocation, search: '' },
+      configurable: true,
+    })
+    renderHook(() => useDeepLink(() => {}, 1543392060000, false))
     expect(history.replaceState).not.toHaveBeenCalled()
   })
 })

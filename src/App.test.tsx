@@ -78,7 +78,7 @@ describe('App', () => {
 
   it('populates text input with short date/time format when deep link loads', () => {
     Object.defineProperty(window, 'location', {
-      value: { ...window.location, search: '?t=1543392060' },
+      value: { ...window.location, search: '?time=1543392060' },
       configurable: true,
     })
     render(<App />)

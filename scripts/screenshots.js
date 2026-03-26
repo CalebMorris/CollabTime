@@ -6,7 +6,7 @@ import { setTimeout as sleep } from 'timers/promises'
 
 const PREVIEW_PORT = 4173
 const BASE_URL = `http://localhost:${PREVIEW_PORT}/CollabTime/`
-const OUTPUT_DIR = 'docs/screenshots'
+const OUTPUT_DIR = process.env.SCREENSHOT_DIR ?? 'docs/screenshots'
 const DEEP_LINK_TIMESTAMP_S = 1543392060   // 2018-11-28 ~00:01 UTC
 
 const FORM_FACTORS = [
@@ -15,6 +15,215 @@ const FORM_FACTORS = [
   { name: 'tablet',      width: 768,  height: 1024 },
   { name: 'desktop',     width: 1280, height: 900  },
   { name: 'desktop-wide', width: 1920, height: 1080 },
+]
+
+// ── Party fixtures ────────────────────────────────────────────────────────────
+
+const TEST_CODE = 'amber-falcon-bridge'
+const LOCKED_MS = new Date('2025-06-15T14:00:00Z').getTime()
+
+// Participant tokens match the shape expected by useRoom / roomProtocol.ts
+const TOKEN_P1 = 'tok-p1-swift-otter'
+const TOKEN_P2 = 'tok-p2-calm-badger'
+
+function joinedMsg({ extraParticipants = [] } = {}) {
+  return {
+    type: 'joined',
+    sessionToken: 'session-abc',
+    participantToken: TOKEN_P1,
+    nickname: 'swift-otter',
+    protocolVersion: '1.0',
+    room: {
+      code: TEST_CODE,
+      state: 'waiting',
+      participants: [
+        { participantToken: TOKEN_P1, nickname: 'swift-otter', isConnected: true, proposalEpochMs: null },
+        ...extraParticipants,
+      ],
+      lockedInEpochMs: null,
+    },
+  }
+}
+
+/** Route WebSocket; respond to the app's `join` / `rejoin` message with `responseMsg`. */
+async function routeWsAndRespond(page, responseMsg) {
+  await page.routeWebSocket(/.*/, (socket) => {
+    socket.onMessage((rawMessage) => {
+      const message = JSON.parse(typeof rawMessage === 'string' ? rawMessage : rawMessage.toString())
+      if (message.type === 'join' || message.type === 'rejoin') {
+        socket.send(JSON.stringify(responseMsg))
+      }
+    })
+  })
+}
+
+/** Navigate + open create overlay + enter room. WS must be routed before calling. */
+async function enterRoomAndWait(page) {
+  await page.goto(BASE_URL, { waitUntil: 'networkidle' })
+  await page.getByRole('button', { name: /start a party/i }).click()
+  await page.getByRole('button', { name: /enter the room/i }).click()
+  await page.getByRole('button', { name: /leave/i }).waitFor({ timeout: 2000 })
+}
+
+// ── Scenarios ─────────────────────────────────────────────────────────────────
+
+const SCENARIOS = [
+  // ── Solo ──────────────────────────────────────────────────────────────────
+
+  {
+    name: 'home',
+    setup: async (page) => {
+      await page.goto(BASE_URL, { waitUntil: 'networkidle' })
+    },
+  },
+
+  {
+    name: 'deep-link',
+    setup: async (page) => {
+      await page.goto(`${BASE_URL}?t=${DEEP_LINK_TIMESTAMP_S}`, { waitUntil: 'networkidle' })
+    },
+  },
+
+  // ── Party overlays (no WS needed) ─────────────────────────────────────────
+
+  {
+    name: 'party-create-overlay',
+    setup: async (page) => {
+      await page.goto(BASE_URL, { waitUntil: 'networkidle' })
+      await page.getByRole('button', { name: /start a party/i }).click()
+      await page.getByRole('dialog').waitFor({ timeout: 2000 })
+    },
+  },
+
+  {
+    name: 'party-join-overlay',
+    setup: async (page) => {
+      await page.goto(`${BASE_URL}?code=${TEST_CODE}`, { waitUntil: 'networkidle' })
+      await page.getByRole('dialog').waitFor({ timeout: 2000 })
+    },
+  },
+
+  // ── Party room: waiting (1 participant, no proposals) ─────────────────────
+
+  {
+    name: 'party-room-waiting',
+    setup: async (page) => {
+      await routeWsAndRespond(page, joinedMsg())
+      await enterRoomAndWait(page)
+    },
+  },
+
+  // ── Party room: active proposals ──────────────────────────────────────────
+
+  {
+    name: 'party-room-proposals',
+    setup: async (page) => {
+      let serverSocket
+      await page.routeWebSocket(/.*/, (socket) => {
+        serverSocket = socket
+        socket.onMessage((rawMessage) => {
+          const message = JSON.parse(typeof rawMessage === 'string' ? rawMessage : rawMessage.toString())
+          if (message.type === 'join' || message.type === 'rejoin') {
+            socket.send(JSON.stringify(joinedMsg({
+              extraParticipants: [
+                { participantToken: TOKEN_P2, nickname: 'calm-badger', isConnected: true, proposalEpochMs: null },
+              ],
+            })))
+          }
+        })
+      })
+      await enterRoomAndWait(page)
+      // Room is loaded; send proposals for both participants
+      await serverSocket.send(JSON.stringify({
+        type: 'proposal_updated',
+        participantToken: TOKEN_P1,
+        epochMs: new Date('2025-06-15T14:00:00Z').getTime(),
+      }))
+      await serverSocket.send(JSON.stringify({
+        type: 'proposal_updated',
+        participantToken: TOKEN_P2,
+        epochMs: new Date('2025-06-15T15:00:00Z').getTime(),
+      }))
+      // Wait for proposals to appear (em-dashes should be gone)
+      await page.waitForFunction(
+        () => !document.body.textContent?.includes('—'),
+        { timeout: 2000 },
+      )
+    },
+  },
+
+  // ── Lock-in modal ─────────────────────────────────────────────────────────
+
+  {
+    name: 'party-lock-in-modal',
+    setup: async (page) => {
+      let serverSocket
+      await page.routeWebSocket(/.*/, (socket) => {
+        serverSocket = socket
+        socket.onMessage((rawMessage) => {
+          const message = JSON.parse(typeof rawMessage === 'string' ? rawMessage : rawMessage.toString())
+          if (message.type === 'join' || message.type === 'rejoin') {
+            socket.send(JSON.stringify(joinedMsg({
+              extraParticipants: [
+                { participantToken: TOKEN_P2, nickname: 'calm-badger', isConnected: true, proposalEpochMs: null },
+              ],
+            })))
+          }
+        })
+      })
+      await enterRoomAndWait(page)
+      await serverSocket.send(JSON.stringify({ type: 'locked_in', epochMs: LOCKED_MS }))
+      await page.getByRole('alertdialog').waitFor({ timeout: 2000 })
+    },
+  },
+
+  // ── Export screen (after lock-in modal dismissed) ─────────────────────────
+
+  {
+    name: 'party-export',
+    setup: async (page) => {
+      let serverSocket
+      await page.routeWebSocket(/.*/, (socket) => {
+        serverSocket = socket
+        socket.onMessage((rawMessage) => {
+          const message = JSON.parse(typeof rawMessage === 'string' ? rawMessage : rawMessage.toString())
+          if (message.type === 'join' || message.type === 'rejoin') {
+            socket.send(JSON.stringify(joinedMsg({
+              extraParticipants: [
+                { participantToken: TOKEN_P2, nickname: 'calm-badger', isConnected: true, proposalEpochMs: null },
+              ],
+            })))
+          }
+        })
+      })
+      await enterRoomAndWait(page)
+      await serverSocket.send(JSON.stringify({ type: 'locked_in', epochMs: LOCKED_MS }))
+      const modal = page.getByRole('alertdialog')
+      await modal.waitFor({ timeout: 2000 })
+      await modal.click()
+      await modal.waitFor({ state: 'hidden', timeout: 2000 })
+    },
+  },
+
+  // ── Dead room ─────────────────────────────────────────────────────────────
+
+  {
+    name: 'party-dead-room',
+    setup: async (page) => {
+      await page.routeWebSocket(/.*/, (socket) => {
+        socket.onMessage((rawMessage) => {
+          const message = JSON.parse(typeof rawMessage === 'string' ? rawMessage : rawMessage.toString())
+          if (message.type === 'join' || message.type === 'rejoin') {
+            socket.send(JSON.stringify({ type: 'error', code: 'ROOM_NOT_FOUND', message: 'Room not found' }))
+          }
+        })
+      })
+      await page.goto(`${BASE_URL}?code=${TEST_CODE}`, { waitUntil: 'networkidle' })
+      await page.getByRole('dialog').waitFor({ timeout: 2000 })
+      await page.getByRole('button', { name: /join party/i }).click()
+      await page.getByRole('heading', { name: /room not found/i }).waitFor({ timeout: 2000 })
+    },
+  },
 ]
 
 // ── Playwright ────────────────────────────────────────────────────────────────
@@ -82,24 +291,19 @@ await waitForServer()
 browser = await chromium.launch()
 
 for (const { name, width, height } of FORM_FACTORS) {
-  const context = await browser.newContext({
-    viewport: { width, height },
-    deviceScaleFactor: 1,
-  })
-  const page = await context.newPage()
-  await page.goto(BASE_URL, { waitUntil: 'networkidle' })
-  const outputPath = `${OUTPUT_DIR}/${name}.png`
-  await page.screenshot({ path: outputPath, fullPage: false })
-  console.log(`  ${name} (${width}×${height}) → ${outputPath}`)
-
-  // Deep-link screenshot (app pre-loaded with a timestamp)
-  const dlPage = await context.newPage()
-  await dlPage.goto(`${BASE_URL}?t=${DEEP_LINK_TIMESTAMP_S}`, { waitUntil: 'networkidle' })
-  const dlOutputPath = `${OUTPUT_DIR}/${name}-deep-link.png`
-  await dlPage.screenshot({ path: dlOutputPath, fullPage: false })
-  console.log(`  ${name}-deep-link (${width}×${height}) → ${dlOutputPath}`)
-
-  await context.close()
+  for (const scenario of SCENARIOS) {
+    const context = await browser.newContext({
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+    })
+    const page = await context.newPage()
+    await scenario.setup(page)
+    mkdirSync(`${OUTPUT_DIR}/${name}`, { recursive: true })
+    const outputPath = `${OUTPUT_DIR}/${name}/${scenario.name}.png`
+    await page.screenshot({ path: outputPath, fullPage: false })
+    console.log(`  ${name}/${scenario.name} (${width}×${height}) → ${outputPath}`)
+    await context.close()
+  }
 }
 
 await browser.close()

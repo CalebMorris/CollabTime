@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { useTimezone } from './hooks/useTimezone'
 import { useDeepLink } from './hooks/useDeepLink'
+import { usePartyMode } from './hooks/usePartyMode'
 import { TextImport } from './components/TextImport'
 import { ManualSelector } from './components/ManualSelector'
 import { ConversionDisplay } from './components/ConversionDisplay'
@@ -8,7 +9,16 @@ import { DiscordExport } from './components/DiscordExport'
 import { ShareLink } from './components/ShareLink'
 import { CalendarExport } from './components/CalendarExport'
 import { TimezoneSelect } from './components/TimezoneSelect'
+import { CoordinateSection } from './components/party/CoordinateSection'
+import { PartyCreateOverlay } from './components/party/PartyCreateOverlay'
+import { PartyJoinOverlay } from './components/party/PartyJoinOverlay'
+import { PartyRoom } from './components/party/PartyRoom'
+import { PartyExportScreen } from './components/party/PartyExportScreen'
+import { PartyDeadRoom } from './components/party/PartyDeadRoom'
+import type { Participant } from './room/roomProtocol'
 import { getAllFormats } from './utils/discordTimestamp'
+import { generateRoomCode } from './utils/partyLink'
+import { loadLockedParticipants } from './room/roomSession'
 
 function App() {
   const { timezone, setTimezone } = useTimezone()
@@ -17,6 +27,24 @@ function App() {
   const [timezonePickerOpen, setTimezonePickerOpen] = useState(false)
   const resultRef = useRef<HTMLElement | null>(null)
   const timezonePickerRef = useRef<HTMLDivElement | null>(null)
+  const { appMode, startParty, joinParty, enterRoom, lockIn, deadRoom, backToSolo } = usePartyMode()
+  const isSoloMode = appMode.kind === 'solo'
+  // Fresh room code generated each time the create overlay is opened
+  const [pendingRoomCode, setPendingRoomCode] = useState(() => generateRoomCode())
+  // Participants captured from the room at lock-in time.
+  // On a fresh lock-in, set via the onLockIn callback from PartyRoom.
+  // On deep-link entry (?locked-in=...), restored from sessionStorage (written by useRoom on locked_in).
+  const [lockedParticipants, setLockedParticipants] = useState<Participant[]>(() => {
+    if (appMode.kind === 'party-locked') {
+      return loadLockedParticipants(appMode.roomCode) ?? []
+    }
+    return []
+  })
+
+  const handleStartParty = () => {
+    setPendingRoomCode(generateRoomCode())
+    startParty()
+  }
 
   useEffect(() => {
     if (!timezonePickerOpen) return
@@ -35,13 +63,50 @@ function App() {
     setImportText(preview)
   }
 
-  useDeepLink(handleDeepLinkLoad, timestamp)
+  useDeepLink(handleDeepLinkLoad, timestamp, isSoloMode)
 
   const handleSetTimestamp = (ms: number) => {
     setTimestamp(ms)
     if (resultRef.current?.scrollIntoView) {
       resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
+  }
+
+  if (appMode.kind === 'party-room') {
+    return (
+      <PartyRoom
+        roomCode={appMode.roomCode}
+        onLeave={backToSolo}
+        onLockIn={(confirmedMs, participants) => {
+          setLockedParticipants(participants)
+          lockIn(appMode.roomCode, confirmedMs)
+        }}
+        onDeadRoom={(code) => deadRoom(code)}
+      />
+    )
+  }
+
+  if (appMode.kind === 'party-locked') {
+    return (
+      <PartyExportScreen
+        confirmedMs={appMode.confirmedMs}
+        participants={lockedParticipants}
+        timezone={timezone}
+        onNewSession={handleStartParty}
+        onBackToSolo={backToSolo}
+      />
+    )
+  }
+
+  if (appMode.kind === 'party-dead') {
+    return (
+      <PartyDeadRoom
+        attemptedCode={appMode.attemptedCode}
+        onTryDifferent={(code) => joinParty(code)}
+        onStartNew={handleStartParty}
+        onBackToSolo={backToSolo}
+      />
+    )
   }
 
   return (
@@ -109,6 +174,8 @@ function App() {
             </h2>
             <ConversionDisplay timestamp={timestamp} timezone={timezone} />
           </section>
+
+          <CoordinateSection onStartParty={handleStartParty} onJoinParty={() => joinParty()} />
         </div>
 
         {/* Right column — slides in when a time is selected */}
@@ -132,6 +199,23 @@ function App() {
         )}
 
       </div>
+
+      {/* Party overlays — rendered on top of solo UI */}
+      {appMode.kind === 'party-create-overlay' && (
+        <PartyCreateOverlay
+          roomCode={pendingRoomCode}
+          onEnterRoom={() => enterRoom(pendingRoomCode)}
+          onDismiss={backToSolo}
+        />
+      )}
+
+      {appMode.kind === 'party-join-overlay' && (
+        <PartyJoinOverlay
+          initialCode={appMode.code}
+          onJoin={(code) => enterRoom(code)}
+          onDismiss={backToSolo}
+        />
+      )}
     </main>
   )
 }

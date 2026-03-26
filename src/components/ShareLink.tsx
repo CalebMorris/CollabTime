@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Share2 } from 'lucide-react'
-import { encodeDeepLink } from '../utils/deepLink'
+import { encodeDeepLink } from '../utils/appUrl'
 
 interface Props {
   timestamp: number | null
@@ -24,7 +24,7 @@ export function ShareLink({ timestamp }: Props) {
   return (
     <div className="flex items-center gap-2 rounded bg-gray-800 px-3 py-2">
       <code className="flex-1 text-sm text-indigo-300 font-mono truncate">
-        {url ?? `${window.location.origin}${window.location.pathname}?t=…`}
+        {url ?? `${window.location.origin}${window.location.pathname}?time=…`}
       </code>
       <button
         aria-label="Copy link"

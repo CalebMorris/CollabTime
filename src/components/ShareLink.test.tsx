@@ -17,12 +17,12 @@ describe('ShareLink', () => {
 
   it('renders a placeholder URL when timestamp is null', () => {
     render(<ShareLink timestamp={null} />)
-    expect(screen.getByText(/\?t=…/)).toBeDefined()
+    expect(screen.getByText(/\?time=…/)).toBeDefined()
   })
 
   it('displays the share URL', () => {
     render(<ShareLink timestamp={1543392060000} />)
-    expect(screen.getByText(/t=1543392060/)).toBeDefined()
+    expect(screen.getByText(/time=1543392060/)).toBeDefined()
   })
 
   it('renders a copy button', () => {
@@ -36,7 +36,7 @@ describe('ShareLink', () => {
       fireEvent.click(screen.getByRole('button', { name: /copy link/i }))
     })
     const written = (navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mock.calls[0][0] as string
-    expect(written).toContain('t=1543392060')
+    expect(written).toContain('time=1543392060')
   })
 
   it('shows "Copied!" for 2 seconds then reverts', async () => {

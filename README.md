@@ -25,7 +25,62 @@ Then take screenshots across all form factors:
 npm run screenshots
 ```
 
-Output: `docs/screenshots/{mobile-sm,mobile-lg,tablet,desktop,desktop-wide}.png`
+Output defaults to `docs/screenshots/`. Override with `SCREENSHOT_DIR`:
+
+```
+SCREENSHOT_DIR=tmp/shots npm run screenshots
+```
+
+### Integration tests (Playwright)
+
+The `e2e/` directory contains Playwright integration tests that run against a live instance of the app.
+
+**Install browser binaries (one-time):**
+
+```
+npx playwright install
+```
+
+**Run against the local dev server** (start `npm run dev` first):
+
+```
+npm run test:e2e
+```
+
+**Run against a different target** (e.g. staging or production):
+
+```
+BASE_URL=https://calebmorris.github.io/CollabTime/ npm run test:e2e
+```
+
+**Interactive UI mode** (useful for debugging):
+
+```
+npm run test:e2e:ui
+```
+
+**Run a specific file or test:**
+
+```
+npx playwright test e2e/solo-mode.spec.ts
+npx playwright test --grep "parses an ISO 8601"
+```
+
+**Run a specific browser only:**
+
+```
+npx playwright test --project=chromium
+```
+
+Test files:
+
+| File | What it covers |
+|---|---|
+| `e2e/solo-mode.spec.ts` | Page load, text import, manual selector, timezone picker, export panel, deep links |
+| `e2e/party-overlays.spec.ts` | Create/join overlays — modal behaviour, validation, clipboard, focus trap |
+| `e2e/party-ws.spec.ts` | Party room with mocked WebSocket — connection lifecycle, proposals, lock-in, dead room |
+
+> The party-ws tests use `page.routeWebSocket()` to intercept the WebSocket connection and simulate server messages — no live WebSocket server is required.
 
 ---
 
