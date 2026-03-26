@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { AppMode } from '../utils/partyLink'
-import { detectInitialMode, encodePartyRoomUrl, encodePartyLockedUrl } from '../utils/partyLink'
+import { detectInitialMode, encodePartyRoomUrl, encodePartyLockedUrl } from '../utils/appUrl'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

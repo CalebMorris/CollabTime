@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { useFocusTrap } from '../../hooks/useFocusTrap'
-import { encodePartyRoomUrl } from '../../utils/partyLink'
+import { encodePartyRoomUrl } from '../../utils/appUrl'
 
 interface Props {
   roomCode: string

@@ -1,6 +1,5 @@
 import { useState } from 'react'
-
-const ROOM_CODE_RE = /^[a-z]+-[a-z]+-[a-z]+$/
+import { ROOM_CODE_RE } from '../../utils/appUrl'
 
 interface Props {
   attemptedCode: string

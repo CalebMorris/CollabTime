@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { encodeDeepLink, decodeDeepLink } from '../utils/deepLink'
+import { encodeDeepLink, decodeDeepLink } from '../utils/appUrl'
 
 export function useDeepLink(
   onLoad: (ms: number) => void,
@@ -9,7 +9,7 @@ export function useDeepLink(
   const onLoadRef = useRef(onLoad)
   onLoadRef.current = onLoad
 
-  // Read ?t= once on mount
+  // Read ?time= once on mount
   useEffect(() => {
     if (!enabled) return
     const ms = decodeDeepLink(window.location.search)

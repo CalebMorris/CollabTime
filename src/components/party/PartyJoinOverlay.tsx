@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react'
 import { useFocusTrap } from '../../hooks/useFocusTrap'
-
-const ROOM_CODE_RE = /^[a-z]+-[a-z]+-[a-z]+$/
+import { ROOM_CODE_RE } from '../../utils/appUrl'
 
 interface Props {
   initialCode: string | null
