@@ -46,7 +46,7 @@ export function ConsensusMeter({ proposals, participantCount }: Props) {
         <div
           data-testid="consensus-bar-fill"
           className={`h-full rounded-full transition-all duration-300 ${
-            allAgree ? 'bg-emerald-500 animate-pulse' : 'bg-indigo-500'
+            allAgree ? 'bg-emerald-500 motion-safe:animate-pulse' : 'bg-indigo-500'
           }`}
           style={{ width: `${ratio * 100}%` }}
         />

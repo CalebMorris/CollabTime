@@ -74,4 +74,15 @@ describe('ConsensusMeter', () => {
     const bar = screen.getByTestId('consensus-bar-fill')
     expect(bar.className).toContain('bg-indigo-500')
   })
+
+  it('uses motion-safe:animate-pulse (not bare animate-pulse) when all agree', () => {
+    const proposals: Proposal[] = [
+      { participantToken: 'pt-1', epochMs: T1 },
+      { participantToken: 'pt-2', epochMs: T1 },
+    ]
+    render(<ConsensusMeter proposals={proposals} participantCount={2} />)
+    const bar = screen.getByTestId('consensus-bar-fill')
+    expect(bar.classList.contains('animate-pulse')).toBe(false)
+    expect(bar.classList.contains('motion-safe:animate-pulse')).toBe(true)
+  })
 })
