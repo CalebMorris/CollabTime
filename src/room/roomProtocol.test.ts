@@ -106,3 +106,63 @@ describe('parseServerMessage', () => {
     expect((msg as { type: string }).type).toBe('some_future_event')
   })
 })
+
+describe('parseServerMessage — field validation', () => {
+  // room_activated: participants must be an array (used with .map() in useRoom)
+  it('returns null for room_activated with participants: null', () => {
+    expect(parseServerMessage(JSON.stringify({ type: 'room_activated', participants: null }))).toBeNull()
+  })
+
+  it('returns null for room_activated with participants missing', () => {
+    expect(parseServerMessage(JSON.stringify({ type: 'room_activated' }))).toBeNull()
+  })
+
+  it('returns null for room_activated with participants as a non-array', () => {
+    expect(parseServerMessage(JSON.stringify({ type: 'room_activated', participants: 'oops' }))).toBeNull()
+  })
+
+  // proposal_updated: epochMs must be a finite number
+  it('returns null for proposal_updated with epochMs: null', () => {
+    expect(parseServerMessage(JSON.stringify({ type: 'proposal_updated', participantToken: 'pt-1', epochMs: null }))).toBeNull()
+  })
+
+  it('returns null for proposal_updated with epochMs missing', () => {
+    expect(parseServerMessage(JSON.stringify({ type: 'proposal_updated', participantToken: 'pt-1' }))).toBeNull()
+  })
+
+  it('returns null for proposal_updated with epochMs: Infinity', () => {
+    // JSON.stringify(Infinity) → "null", so we build the string manually
+    expect(parseServerMessage('{"type":"proposal_updated","participantToken":"pt-1","epochMs":null}')).toBeNull()
+  })
+
+  // locked_in: epochMs must be a finite number
+  it('returns null for locked_in with epochMs: null', () => {
+    expect(parseServerMessage(JSON.stringify({ type: 'locked_in', epochMs: null }))).toBeNull()
+  })
+
+  it('returns null for locked_in with epochMs missing', () => {
+    expect(parseServerMessage(JSON.stringify({ type: 'locked_in' }))).toBeNull()
+  })
+
+  // joined: room.participants must be an array
+  it('returns null for joined with room.participants: null', () => {
+    expect(parseServerMessage(JSON.stringify({
+      type: 'joined',
+      sessionToken: 'abc',
+      participantToken: 'def',
+      nickname: 'Teal Fox',
+      protocolVersion: '1.0',
+      room: { code: 'x-y-z', state: 'waiting', participants: null, lockedInEpochMs: null },
+    }))).toBeNull()
+  })
+
+  it('returns null for joined without a room field', () => {
+    expect(parseServerMessage(JSON.stringify({
+      type: 'joined',
+      sessionToken: 'abc',
+      participantToken: 'def',
+      nickname: 'Teal Fox',
+      protocolVersion: '1.0',
+    }))).toBeNull()
+  })
+})

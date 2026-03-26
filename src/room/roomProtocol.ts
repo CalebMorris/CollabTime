@@ -139,7 +139,9 @@ export type ServerMessage =
 
 /**
  * Parse a raw WebSocket frame into a typed ServerMessage.
- * Returns null for malformed JSON or messages with no `type` field.
+ * Returns null for malformed JSON, messages with no `type` field, or messages
+ * with required fields missing/wrong-typed (guards against server bugs that
+ * would cause downstream crashes, e.g. participants: null crashing .map()).
  * Unknown types are passed through for forward-compatibility.
  */
 export function parseServerMessage(raw: string): ServerMessage | null {
@@ -153,6 +155,26 @@ export function parseServerMessage(raw: string): ServerMessage | null {
     ) {
       return null
     }
+    const msg = parsed as Record<string, unknown>
+    const type = msg.type as string
+
+    if (type === 'room_activated') {
+      if (!Array.isArray(msg.participants)) return null
+    }
+
+    if (type === 'proposal_updated') {
+      if (typeof msg.epochMs !== 'number' || !Number.isFinite(msg.epochMs)) return null
+    }
+
+    if (type === 'locked_in') {
+      if (typeof msg.epochMs !== 'number' || !Number.isFinite(msg.epochMs)) return null
+    }
+
+    if (type === 'joined') {
+      const room = msg.room as Record<string, unknown> | undefined
+      if (typeof room !== 'object' || room === null || !Array.isArray(room.participants)) return null
+    }
+
     return parsed as ServerMessage
   } catch {
     return null
