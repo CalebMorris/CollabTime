@@ -4,7 +4,7 @@ import { useRoom } from './useRoom'
 import type { RoomSocketCallbacks } from '../room/RoomSocket'
 import type { RoomSocket } from '../room/RoomSocket'
 import type { ServerMessage } from '../room/roomProtocol'
-import { saveSessionToken } from '../room/roomSession'
+import { saveSessionToken, loadLockedParticipants } from '../room/roomSession'
 
 // ─── FakeRoomSocket ───────────────────────────────────────────────────────────
 
@@ -342,6 +342,25 @@ describe('useRoom — locked_in', () => {
     expect(result.current.roomPhase).toBe('locked_in')
     expect(result.current.lockedEpochMs).toBe(1711209600000)
     expect(sessionStorage.getItem(`collabtime:session:${ROOM_CODE}`)).toBeNull()
+  })
+
+  it('saves participant snapshot to sessionStorage for deep-link recovery', () => {
+    const { factory, latest } = makeFactory()
+    const { result } = renderHook(() => useRoom(ROOM_CODE, factory))
+    act(() => result.current.connect())
+    act(() => latest().simulateOpen())
+    act(() => latest().simulateMessage(makeJoinedMsg()))
+    // Add a second participant before lock-in
+    act(() => latest().simulateMessage({
+      type: 'participant_joined',
+      participantToken: 'part-xyz',
+      nickname: 'Azure Sloth',
+    }))
+    act(() => latest().simulateMessage({ type: 'locked_in', epochMs: 1711209600000 }))
+    const stored = loadLockedParticipants(ROOM_CODE)
+    expect(stored).not.toBeNull()
+    expect(stored!.map(p => p.nickname)).toContain('Teal Fox')
+    expect(stored!.map(p => p.nickname)).toContain('Azure Sloth')
   })
 })
 

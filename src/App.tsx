@@ -18,6 +18,7 @@ import { PartyDeadRoom } from './components/party/PartyDeadRoom'
 import type { Participant } from './room/roomProtocol'
 import { getAllFormats } from './utils/discordTimestamp'
 import { generateRoomCode } from './utils/partyLink'
+import { loadLockedParticipants } from './room/roomSession'
 
 function App() {
   const { timezone, setTimezone } = useTimezone()
@@ -30,8 +31,15 @@ function App() {
   const isSoloMode = appMode.kind === 'solo'
   // Fresh room code generated each time the create overlay is opened
   const [pendingRoomCode, setPendingRoomCode] = useState(() => generateRoomCode())
-  // Participants captured from the room at lock-in time (not available from deep-link)
-  const [lockedParticipants, setLockedParticipants] = useState<Participant[]>([])
+  // Participants captured from the room at lock-in time.
+  // On a fresh lock-in, set via the onLockIn callback from PartyRoom.
+  // On deep-link entry (?locked-in=...), restored from sessionStorage (written by useRoom on locked_in).
+  const [lockedParticipants, setLockedParticipants] = useState<Participant[]>(() => {
+    if (appMode.kind === 'party-locked') {
+      return loadLockedParticipants(appMode.roomCode) ?? []
+    }
+    return []
+  })
 
   const handleStartParty = () => {
     setPendingRoomCode(generateRoomCode())

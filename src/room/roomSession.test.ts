@@ -5,6 +5,8 @@ import {
   saveParticipantToken,
   loadParticipantToken,
   clearRoomSession,
+  saveLockedParticipants,
+  loadLockedParticipants,
 } from './roomSession'
 
 describe('roomSession', () => {
@@ -45,6 +47,34 @@ describe('roomSession', () => {
       saveParticipantToken('purple-falcon-bridge', 'participant-tok')
       expect(loadSessionToken('purple-falcon-bridge')).toBe('session-tok')
       expect(loadParticipantToken('purple-falcon-bridge')).toBe('participant-tok')
+    })
+  })
+
+  describe('lockedParticipants', () => {
+    const participants = [
+      { participantToken: 'pt-1', nickname: 'Teal Fox', isConnected: true },
+      { participantToken: 'pt-2', nickname: 'Azure Sloth', isConnected: true },
+    ]
+
+    it('saves and loads a participant snapshot', () => {
+      saveLockedParticipants('purple-falcon-bridge', participants)
+      expect(loadLockedParticipants('purple-falcon-bridge')).toEqual(participants)
+    })
+
+    it('returns null when no snapshot stored', () => {
+      expect(loadLockedParticipants('purple-falcon-bridge')).toBeNull()
+    })
+
+    it('returns null for corrupt JSON in storage', () => {
+      sessionStorage.setItem('collabtime:locked-participants:purple-falcon-bridge', '{bad json')
+      expect(loadLockedParticipants('purple-falcon-bridge')).toBeNull()
+    })
+
+    it('namespaces by roomCode — different rooms do not conflict', () => {
+      saveLockedParticipants('room-a-one', [{ participantToken: 'pt-a', nickname: 'Alpha', isConnected: true }])
+      saveLockedParticipants('room-b-two', [{ participantToken: 'pt-b', nickname: 'Beta', isConnected: true }])
+      expect(loadLockedParticipants('room-a-one')![0].nickname).toBe('Alpha')
+      expect(loadLockedParticipants('room-b-two')![0].nickname).toBe('Beta')
     })
   })
 

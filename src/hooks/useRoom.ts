@@ -7,6 +7,7 @@ import {
   loadSessionToken,
   saveParticipantToken,
   clearRoomSession,
+  saveLockedParticipants,
 } from '../room/roomSession'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -269,6 +270,7 @@ export function useRoom(
 
       case 'locked_in':
         clearRoomSession(roomCode)
+        saveLockedParticipants(roomCode, stateRef.current.participants)
         setState((s) => ({ ...s, roomPhase: 'locked_in', lockedEpochMs: msg.epochMs }))
         break
 
