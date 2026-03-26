@@ -6,6 +6,7 @@ Timezone coordination tool. Users pick a time in their timezone; others see it i
 
 - React 19, TypeScript, Tailwind CSS 4
 - Vite (dev server + build)
+- ESLint 9 (flat config, `eslint.config.js`) with `typescript-eslint`, `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh`, `eslint-plugin-jsx-a11y`
 - Vitest + Testing Library (tests)
 - chrono-node (natural language date parsing)
 
@@ -24,6 +25,25 @@ npm run coverage      # test coverage
 npm run test:e2e      # Playwright integration tests (requires dev server on localhost:5173)
 npm run test:e2e:ui   # Playwright UI mode (for debugging)
 ```
+
+## Linting
+
+Config: `eslint.config.js` (ESLint 9 flat config). Run with `npm run lint`.
+
+**Enabled rule sets:**
+- `@eslint/js` recommended
+- `typescript-eslint` recommended
+- `eslint-plugin-react-hooks` recommended
+- `eslint-plugin-jsx-a11y` recommended (with `no-autofocus` disabled — `autoFocus` is intentionally used for modal focus management per WCAG)
+
+**Intentional suppressions** (do not remove without understanding the pattern):
+- `jsx-a11y/no-autofocus` — disabled globally; `autoFocus` is correct practice for moving focus into modals
+- `jsx-a11y/click-events-have-key-events` + `jsx-a11y/interactive-supports-focus` on `role="option"` divs in `TimezoneSelect` — keyboard navigation uses the `aria-activedescendant` pattern on the parent input; options are not tab-focusable by design
+- `jsx-a11y/no-noninteractive-element-interactions` + `jsx-a11y/click-events-have-key-events` on `LockInModal`'s `role="alertdialog"` div — the full-screen overlay is intentionally click-to-dismiss; Escape is handled separately
+- `prefer-const` on `thisSocket` in `useRoom.ts` — declared before callbacks (which close over it) then assigned once; cannot be `const` without moving the assignment inline, which TypeScript would flag as a TDZ reference in closures
+- `@typescript-eslint/no-this-alias` in `RoomSocket.test.ts` — test helper captures `this` to track the active mock WebSocket instance; the rule targets `const self = this` antipatterns and fires as a false positive here
+
+**Backdrop divs** in `PartyCreateOverlay` and `PartyJoinOverlay` use `role="presentation"` to suppress jsx-a11y warnings — this is the correct semantic for a click-outside-to-dismiss overlay layer.
 
 ## Conventions
 

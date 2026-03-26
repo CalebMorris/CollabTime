@@ -15,7 +15,7 @@ describe('DiscordExport', () => {
 
   afterEach(() => {
     vi.useRealTimers()
-    delete (HTMLElement.prototype as any).scrollIntoView
+    delete (HTMLElement.prototype as { scrollIntoView?: unknown }).scrollIntoView
   })
 
   it('renders nothing when timestamp is null', () => {

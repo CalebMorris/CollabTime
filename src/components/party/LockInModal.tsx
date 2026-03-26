@@ -33,6 +33,7 @@ export function LockInModal({ confirmedMs, participantCount, timezone, onDismiss
   const formattedTime = formatInTimezone(confirmedMs, timezone)
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events
     <div
       ref={dialogRef}
       role="alertdialog"
