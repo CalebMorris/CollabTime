@@ -95,6 +95,7 @@ export function useRoom(
     // A stale socket (e.g. from a React StrictMode double-invoke cleanup) may fire
     // onClose/onError after a new socket has already been created — those callbacks
     // must be ignored or they will null out socketRef and clobber the live socket.
+    // eslint-disable-next-line prefer-const
     let thisSocket: RoomSocket
     // Tracks whether onOpen sent a rejoin (vs a fresh join). Used by onClose to
     // decide whether a drop during the joining phase should trigger a reconnect:

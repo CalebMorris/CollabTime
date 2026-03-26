@@ -26,6 +26,7 @@ export function PartyJoinOverlay({ initialCode, onJoin, onDismiss }: Props) {
       {/* Backdrop */}
       <div
         data-testid="overlay-backdrop"
+        role="presentation"
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onDismiss}
       />

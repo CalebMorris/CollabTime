@@ -95,6 +95,7 @@ export function TimezoneSelect({ value, onChange, autoFocus, initialQuery }: Pro
           const isFocused = index === safeIndex
           const isSearchNarrowed = filtered.length === 1 && !isSelected && !isFocused
           return (
+            // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
             <div
               key={tz}
               id={optionId}
