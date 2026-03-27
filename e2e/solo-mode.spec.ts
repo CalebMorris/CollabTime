@@ -174,6 +174,9 @@ test.describe('Share & Export panel', () => {
   })
 
   test('deep link copy button changes to "Copied!" and reverts', async ({ page }) => {
+    if (test.info().project.name === 'firefox') {
+      test.skip(true, 'Clipboard tests not supported in Firefox')
+    }
     // Grant clipboard permissions
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
 
@@ -185,6 +188,9 @@ test.describe('Share & Export panel', () => {
   })
 
   test('deep link URL contains the ?time= parameter', async ({ page }) => {
+    if (test.info().project.name === 'firefox') {
+      test.skip(true, 'Clipboard tests not supported in Firefox')
+    }
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
 
     // The URL is shown inline as a <code> element
@@ -212,6 +218,9 @@ test.describe('Share & Export panel', () => {
   })
 
   test('Discord copy button changes to "Copied!" for the clicked format', async ({ page }) => {
+    if (test.info().project.name === 'firefox') {
+      test.skip(true, 'Clipboard tests not supported in Firefox')
+    }
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
 
     await page.getByRole('button', { name: /discord timestamps/i }).click()

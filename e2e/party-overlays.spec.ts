@@ -32,6 +32,10 @@ test.describe('PartyCreateOverlay', () => {
   })
 
   test('"Copy Code" button changes to "Copied!" and reverts', async ({ page }) => {
+    const ti = test.info()
+    if (ti.project.name === 'firefox') {
+      test.skip(ti.project.name === 'firefox', 'Clipboard tests not supported in Firefox')
+    }
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
 
     const copyCodeButton = page.getByRole('button', { name: /copy code/i })
@@ -41,6 +45,9 @@ test.describe('PartyCreateOverlay', () => {
   })
 
   test('"Copy Link" button changes to "Copied!" and reverts', async ({ page }) => {
+    if (test.info().project.name === 'firefox') {
+      test.skip(true, 'Clipboard tests not supported in Firefox')
+    }
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
 
     const copyLinkButton = page.getByRole('button', { name: /copy link/i })
@@ -50,6 +57,9 @@ test.describe('PartyCreateOverlay', () => {
   })
 
   test('"Copy Link" writes a URL containing ?code= to the clipboard', async ({ page }) => {
+    if (test.info().project.name === 'firefox') {
+      test.skip(true, 'Clipboard tests not supported in Firefox')
+    }
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
 
     await page.getByRole('button', { name: /copy link/i }).click()
