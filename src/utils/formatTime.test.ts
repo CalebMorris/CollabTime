@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatInTimezone, formatUtc, formatCountdown } from './formatTime'
+import { formatInTimezone, formatUtc, formatCountdown, formatCompactInTimezone } from './formatTime'
 
 // TZ=UTC is set globally — all Intl output is deterministic
 
@@ -28,6 +28,27 @@ describe('formatInTimezone', () => {
 describe('formatUtc', () => {
   it('is equivalent to formatInTimezone with UTC', () => {
     expect(formatUtc(NOV_28_2018_UTC_MS)).toBe(formatInTimezone(NOV_28_2018_UTC_MS, 'UTC'))
+  })
+})
+
+describe('formatCompactInTimezone', () => {
+  it('omits the weekday and year', () => {
+    const result = formatCompactInTimezone(NOV_28_2018_UTC_MS, 'UTC')
+    expect(result).not.toMatch(/Wed|Thu|Fri|Sat|Sun|Mon|Tue/)
+    expect(result).not.toContain('2018')
+  })
+
+  it('includes month, day, hour and minute', () => {
+    const result = formatCompactInTimezone(NOV_28_2018_UTC_MS, 'UTC')
+    expect(result).toContain('Nov')
+    expect(result).toContain('28')
+    expect(result).toContain('11:01')
+  })
+
+  it('honours the target timezone', () => {
+    // UTC+9: 11:01 UTC → 20:01 JST → 8:01 PM in 12-hour
+    const result = formatCompactInTimezone(NOV_28_2018_UTC_MS, 'Asia/Tokyo')
+    expect(result).toContain('8:01')
   })
 })
 

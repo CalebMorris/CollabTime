@@ -242,6 +242,46 @@ test.describe('Party room — proposals board', () => {
     await expect(page.getByText('calm-badger').locator('..')).not.toContainText('—', { timeout: 4000 })
   })
 
+  test('nickname is not visually truncated when a proposal time is shown', async ({ page }) => {
+    // Use realistic server-style nicknames (title case, 2 words) to stress the layout
+    const realisticNicknameMsg = joinedMsg({
+      nickname: 'Rocky Snow',
+      participantToken: TOKEN_P1,
+      extraParticipants: [{ participantToken: TOKEN_P2, nickname: 'Hefty Sand' }],
+    })
+    const serverWs$ = await mockServer(page, realisticNicknameMsg)
+    await enterRoomViaCreateOverlay(page)
+    await waitForRoomConnected(page)
+
+    const serverWs = await serverWs$()
+    // Send proposals for both — including the own (You) row which has the tightest layout
+    await serverWs.send(JSON.stringify({
+      type: 'proposal_updated',
+      participantToken: TOKEN_P1,
+      epochMs: new Date('2025-03-27T20:00:00Z').getTime(),
+    }))
+    await serverWs.send(JSON.stringify({
+      type: 'proposal_updated',
+      participantToken: TOKEN_P2,
+      epochMs: new Date('2025-03-26T17:14:00Z').getTime(),
+    }))
+
+    // Wait for both times to appear
+    await expect(page.getByText('Hefty Sand').locator('..')).not.toContainText('—', { timeout: 4000 })
+
+    await page.screenshot({ path: 'test-results/ux004-proposals-with-time.png' })
+
+    // Neither nickname span should be overflowing (scrollWidth > clientWidth = truncated)
+    const board = page.getByRole('region', { name: /proposals/i })
+    for (const nickname of ['Rocky Snow', 'Hefty Sand']) {
+      const nicknameEl = board.getByText(nickname)
+      const isOverflowing = await nicknameEl.evaluate(
+        (el) => el.scrollWidth > el.clientWidth
+      )
+      expect(isOverflowing, `${nickname} should not be truncated`).toBe(false)
+    }
+  })
+
   test('a new participant joining updates the proposals board', async ({ page }) => {
     const serverWs$ = await mockServer(page, joinedMsg())
     await enterRoomViaCreateOverlay(page)
