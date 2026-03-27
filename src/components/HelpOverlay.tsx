@@ -118,7 +118,7 @@ export function HelpOverlay({ onDismiss, partyModeEnabled = false }: Props) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="help-overlay-title"
-        className="relative z-10 w-full max-w-md rounded-xl border border-gray-700 bg-gray-900 shadow-xl mx-4 flex flex-col max-h-[80vh]"
+        className="relative w-full max-w-md rounded-xl border border-gray-700 bg-gray-900 shadow-xl mx-4 flex flex-col max-h-[80vh]"
       >
         {/* Header */}
         <div className="px-6 pt-6 pb-4 border-b border-gray-800 flex-shrink-0">

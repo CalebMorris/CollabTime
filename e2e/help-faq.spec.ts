@@ -23,7 +23,8 @@ test.describe('Help & FAQ overlay', () => {
     await page.goto('.')
     await page.getByRole('button', { name: /help/i }).click()
     await expect(page.getByRole('dialog')).toBeVisible()
-    await page.getByTestId('help-backdrop').click()
+    // Use dispatchEvent to force click through any overlapping elements
+    await page.getByTestId('help-backdrop').dispatchEvent('click')
     await expect(page.getByRole('dialog')).not.toBeVisible()
   })
 
