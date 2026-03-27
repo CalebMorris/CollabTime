@@ -265,3 +265,4 @@ Three layers — no router:
 | Dead room errors | Generic "Room not found" for all `ROOM_NOT_FOUND` errors |
 | Post lock-in export | **Nicknames only** — no timezone info shown |
 | Lock-in modal | Auto-dismisses after 2500ms; tappable/clickable to skip early |
+| Party mode result section | Shows local time + UTC (via `ConversionDisplay`) when a time is parsed; export features only appear after lock-in |
