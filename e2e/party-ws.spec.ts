@@ -190,7 +190,7 @@ test.describe('Party room — connection lifecycle', () => {
     shouldRespond = false
     await currentWs!.close()
 
-    await expect(page.getByText(/reconnecting/i)).toBeVisible({ timeout: 6000 })
+    await expect(page.getByRole('alert').getByText(/reconnecting/i)).toBeVisible({ timeout: 6000 })
   })
 })
 
