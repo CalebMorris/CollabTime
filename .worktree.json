@@ -1,0 +1,4 @@
+{
+  "copy": [".env.local"],
+  "run":  ["npm install"]
+}  
