@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 interface Props {
   timezone: string
   onTime: (ms: number) => void
@@ -54,6 +56,7 @@ function localToUtcMs(localDateStr: string, timezone: string): number {
 }
 
 export function ManualSelector({ timezone, onTime, value = null }: Props) {
+  const { t } = useTranslation()
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.value) return
     onTime(localToUtcMs(e.target.value, timezone))
@@ -64,7 +67,7 @@ export function ManualSelector({ timezone, onTime, value = null }: Props) {
   return (
     <div>
       <label htmlFor="manual-dt" className="block text-sm text-gray-300 mb-1">
-        Date and time
+        {t('manualSelector.label')}
       </label>
       <input
         id="manual-dt"

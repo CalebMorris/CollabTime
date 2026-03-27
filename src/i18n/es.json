@@ -1,0 +1,133 @@
+{
+  "common": {
+    "or": "o",
+    "copied": "\u00a1Copiado!",
+    "pickATime": "Elige una hora",
+    "shareAndExport": "Compartir y exportar",
+    "privacyNotice": "Privacidad: solo se comparten los tiempos propuestos \u2014 ning\u00fan dato de zona horaria sale de tu dispositivo.",
+    "roomCodePlaceholder": "palabra-palabra-palabra",
+    "roomCodeAriaLabel": "C\u00f3digo de sala"
+  },
+  "app": {
+    "title": "CollabTime",
+    "result": "Resultado"
+  },
+  "textImport": {
+    "ariaLabel": "Ingresar hora",
+    "placeholder": "p. ej. ma\u00f1ana a las 3pm, 2024-01-15T09:00:00Z, 1543392060",
+    "parseButton": "Analizar"
+  },
+  "manualSelector": {
+    "label": "Fecha y hora"
+  },
+  "conversionDisplay": {
+    "localTime": "Hora local",
+    "utc": "UTC",
+    "in": "En",
+    "ago": "Hace",
+    "days": "d\u00edas",
+    "hours": "horas",
+    "minutes": "minutos",
+    "seconds": "segundos"
+  },
+  "shareLink": {
+    "copyAriaLabel": "Copiar enlace"
+  },
+  "calendarExport": {
+    "calendarEvent": "Evento de calendario",
+    "addToGoogleAriaLabel": "A\u00f1adir a Google Calendar",
+    "googleCalendar": "Google Calendar",
+    "downloadIcs": "Descargar .ics",
+    "downloadIcsAriaLabel": "Descargar .ics",
+    "downloaded": "\u00a1Descargado!"
+  },
+  "discordExport": {
+    "toggleLabel": "Marcas de tiempo de Discord",
+    "copyFormatAriaLabel": "Copiar {{label}}",
+    "copy": "Copiar"
+  },
+  "timezoneSelect": {
+    "searchAriaLabel": "Buscar zonas horarias",
+    "placeholder": "Buscar zonas horarias\u2026",
+    "typeToSearch": "Escribe para buscar zonas horarias",
+    "noResults": "Sin resultados para \u201c{{query}}\u201d",
+    "listboxAriaLabel": "Zonas horarias",
+    "resultCount_one": "{{count}} zona horaria encontrada",
+    "resultCount_other": "{{count}} zonas horarias encontradas"
+  },
+  "coordinate": {
+    "heading": "Coordinar",
+    "startParty": "Iniciar una sala",
+    "joinParty": "Unirse a una sala"
+  },
+  "partyCreate": {
+    "title": "Tu sala de grupo",
+    "subtitle": "Comparte este c\u00f3digo o enlace para invitar a otros.",
+    "copyCodeAriaLabel": "Copiar c\u00f3digo",
+    "copyCode": "Copiar c\u00f3digo",
+    "copyLinkAriaLabel": "Copiar enlace",
+    "copyLink": "Copiar enlace",
+    "enterRoom": "Entrar a la sala"
+  },
+  "partyJoin": {
+    "title": "Unirse a una sala",
+    "subtitle": "Ingresa el c\u00f3digo de tres palabras que te compartieron.",
+    "formatError": "Formato: palabra-palabra-palabra (tres palabras en min\u00fasculas)",
+    "joinButton": "Unirse a la sala"
+  },
+  "partyRoom": {
+    "leaveAriaLabel": "Salir de la sala",
+    "leaveButton": "Salir",
+    "ownProposalHint": "Tu propuesta actual est\u00e1 en el tablero. Elige una nueva hora para actualizarla.",
+    "errorCode": "Error: {{errorCode}}",
+    "connectionIdle": "Inactivo",
+    "connectionConnecting": "Conectando...",
+    "connectionJoining": "Uni\u00e9ndose...",
+    "connectionConnected": "Conectado",
+    "connectionReconnecting": "Reconectando...",
+    "connectionFailed": "Error de conexi\u00f3n",
+    "connectionExpired": "Sala expirada"
+  },
+  "proposals": {
+    "heading": "Propuestas",
+    "waitingHint": "Esperando que otros se unan... Comparte tu c\u00f3digo para invitarlos."
+  },
+  "participantRow": {
+    "you": "(T\u00fa)",
+    "reconnecting": "Reconectando...",
+    "left": "(sali\u00f3)"
+  },
+  "consensusMeter": {
+    "agreeStatus": "{{agreeing}} de {{total}} de acuerdo",
+    "progressAriaLabel": "Consenso"
+  },
+  "proposeCta": {
+    "proposeButton": "Proponer esta hora"
+  },
+  "lockInModal": {
+    "heading": "\u00a1Confirmado!",
+    "allOnBoard": "Los {{participantCount}} de acuerdo",
+    "tapToContinue": "Toca en cualquier lugar para continuar"
+  },
+  "nicknameDisplay": {
+    "prefix": "Tu apodo:"
+  },
+  "reconnectingBanner": {
+    "reconnecting": "Reconectando... {{secondsRemaining}}s",
+    "slotHeld": "Tu lugar est\u00e1 reservado"
+  },
+  "partyExport": {
+    "yourTime": "Tu hora",
+    "onBoard": "De acuerdo",
+    "newSession": "Nueva sesi\u00f3n",
+    "backToSolo": "Volver al modo individual"
+  },
+  "partyDead": {
+    "heading": "Sala no encontrada",
+    "description": "Puede que haya expirado o que el c\u00f3digo sea incorrecto.",
+    "joinButton": "Unirse",
+    "tryDifferent": "Probar otro c\u00f3digo",
+    "startNew": "Iniciar una nueva sala",
+    "goToSolo": "Ir al modo individual"
+  }
+}

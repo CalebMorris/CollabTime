@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { formatInTimezone } from '../../utils/formatTime'
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 const AUTO_DISMISS_MS = 2500
 
 export function LockInModal({ confirmedMs, participantCount, timezone, onDismiss }: Props) {
+  const { t } = useTranslation()
   const dialogRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -51,7 +53,7 @@ export function LockInModal({ confirmedMs, participantCount, timezone, onDismiss
             id="lock-in-heading"
             className="text-3xl font-bold text-white"
           >
-            Locked In!
+            {t('lockInModal.heading')}
           </h2>
         </div>
 
@@ -62,11 +64,11 @@ export function LockInModal({ confirmedMs, participantCount, timezone, onDismiss
 
         {/* Participant count */}
         <p className="text-sm text-gray-400">
-          All {participantCount} on board
+          {t('lockInModal.allOnBoard', { participantCount })}
         </p>
 
         {/* Tap to dismiss hint */}
-        <p className="text-xs text-gray-600">Tap anywhere to continue</p>
+        <p className="text-xs text-gray-600">{t('lockInModal.tapToContinue')}</p>
       </div>
     </div>
   )

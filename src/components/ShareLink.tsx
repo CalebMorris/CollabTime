@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Share2 } from 'lucide-react'
 import { encodeDeepLink } from '../utils/appUrl'
 
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export function ShareLink({ timestamp }: Props) {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
 
   const url = timestamp !== null
@@ -27,12 +29,12 @@ export function ShareLink({ timestamp }: Props) {
         {url ?? `${window.location.origin}${window.location.pathname}?time=…`}
       </code>
       <button
-        aria-label="Copy link"
+        aria-label={t('shareLink.copyAriaLabel')}
         aria-live="polite"
         onClick={handleCopy}
         className="min-h-[44px] px-3 rounded bg-gray-700 hover:bg-gray-600 text-gray-200 text-xs shrink-0"
       >
-        {copied ? 'Copied!' : <Share2 className="w-4 h-4" />}
+        {copied ? t('common.copied') : <Share2 className="w-4 h-4" />}
       </button>
     </div>
   )

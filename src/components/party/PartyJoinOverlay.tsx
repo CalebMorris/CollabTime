@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useFocusTrap } from '../../hooks/useFocusTrap'
 import { ROOM_CODE_RE } from '../../utils/appUrl'
 
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function PartyJoinOverlay({ initialCode, onJoin, onDismiss }: Props) {
+  const { t } = useTranslation()
   const [inputValue, setInputValue] = useState(initialCode ?? '')
   const isPreFilled = initialCode !== null
   const isValid = ROOM_CODE_RE.test(inputValue)
@@ -43,10 +45,10 @@ export function PartyJoinOverlay({ initialCode, onJoin, onDismiss }: Props) {
           id="join-overlay-title"
           className="text-lg font-semibold text-gray-100 mb-1"
         >
-          Join a Party
+          {t('partyJoin.title')}
         </h2>
         <p className="text-sm text-gray-400 mb-4">
-          Enter the three-word code shared with you.
+          {t('partyJoin.subtitle')}
         </p>
 
         {/* Code input */}
@@ -55,12 +57,12 @@ export function PartyJoinOverlay({ initialCode, onJoin, onDismiss }: Props) {
           value={inputValue}
           readOnly={isPreFilled}
           onChange={(e) => setInputValue(e.target.value.toLowerCase())}
-          placeholder="word-word-word"
+          placeholder={t('common.roomCodePlaceholder')}
           autoCapitalize="off"
           autoCorrect="off"
           spellCheck={false}
           inputMode="url"
-          aria-label="Party room code"
+          aria-label={t('common.roomCodeAriaLabel')}
           aria-invalid={showError}
           aria-describedby={showError ? 'code-error' : undefined}
           className="min-h-[44px] w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm font-mono text-gray-100 placeholder-gray-500 mb-1 focus:outline-none focus:border-indigo-500"
@@ -73,7 +75,7 @@ export function PartyJoinOverlay({ initialCode, onJoin, onDismiss }: Props) {
             role="alert"
             className="text-xs text-red-400 mb-3"
           >
-            Format: word-word-word (three lowercase words)
+            {t('partyJoin.formatError')}
           </p>
         )}
 
@@ -86,12 +88,12 @@ export function PartyJoinOverlay({ initialCode, onJoin, onDismiss }: Props) {
           disabled={!isValid}
           className="min-h-[44px] w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed mb-4"
         >
-          Join Party
+          {t('partyJoin.joinButton')}
         </button>
 
         {/* Privacy notice */}
         <p className="text-xs text-gray-500 text-center">
-          Privacy: only proposed times are shared — no timezone data leaves your device.
+          {t('common.privacyNotice')}
         </p>
       </div>
     </div>

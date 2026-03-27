@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { Participant, Proposal } from '../../room/roomProtocol'
 import { formatInTimezone } from '../../utils/formatTime'
 
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function ParticipantRow({ participant, proposal, isOwn, viewerTimezone, isLocked }: Props) {
+  const { t } = useTranslation()
   const isReconnecting = !participant.isConnected && proposal !== null
   const isDisconnected = !participant.isConnected && proposal === null
 
@@ -26,7 +28,7 @@ export function ParticipantRow({ participant, proposal, isOwn, viewerTimezone, i
       {/* Left: name + status */}
       <div className="flex items-center gap-2 min-w-0">
         {isOwn && (
-          <span className="text-xs text-indigo-400 shrink-0">(You)</span>
+          <span className="text-xs text-indigo-400 shrink-0">{t('participantRow.you')}</span>
         )}
         <span
           className={`truncate ${isDisconnected ? 'line-through text-gray-600' : 'text-gray-200'}`}
@@ -34,10 +36,10 @@ export function ParticipantRow({ participant, proposal, isOwn, viewerTimezone, i
           {participant.nickname}
         </span>
         {isReconnecting && (
-          <span className="text-xs text-amber-400 shrink-0">Reconnecting...</span>
+          <span className="text-xs text-amber-400 shrink-0">{t('participantRow.reconnecting')}</span>
         )}
         {isDisconnected && (
-          <span className="text-xs text-gray-600 shrink-0">(left)</span>
+          <span className="text-xs text-gray-600 shrink-0">{t('participantRow.left')}</span>
         )}
       </div>
 

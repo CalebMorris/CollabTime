@@ -1,4 +1,5 @@
 import { useId, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getSortedTimezones } from '../utils/timezones'
 
 interface Props {
@@ -17,6 +18,7 @@ function filterEntries(query: string) {
 }
 
 export function TimezoneSelect({ value, onChange, autoFocus, initialQuery }: Props) {
+  const { t } = useTranslation()
   const [query, setQuery] = useState(initialQuery !== undefined ? initialQuery : value)
   const [focusedIndex, setFocusedIndex] = useState(-1)
 
@@ -64,12 +66,12 @@ export function TimezoneSelect({ value, onChange, autoFocus, initialQuery }: Pro
       <input
         type="text"
         role="combobox"
-        aria-label="Search timezones"
+        aria-label={t('timezoneSelect.searchAriaLabel')}
         aria-expanded={filtered.length > 0}
         aria-controls={listboxId}
         aria-activedescendant={focusedOptionId}
         aria-haspopup="listbox"
-        placeholder="Search timezones…"
+        placeholder={t('timezoneSelect.placeholder')}
         value={query}
         onChange={handleQueryChange}
         onKeyDown={handleKeyDown}
@@ -77,16 +79,16 @@ export function TimezoneSelect({ value, onChange, autoFocus, initialQuery }: Pro
         className="rounded bg-gray-800 px-2 py-1 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
       />
       {isDirty && !query && (
-        <p className="px-2 py-1 text-sm text-gray-500">Type to search timezones</p>
+        <p className="px-2 py-1 text-sm text-gray-500">{t('timezoneSelect.typeToSearch')}</p>
       )}
       {isDirty && query && filtered.length === 0 && (
-        <p className="px-2 py-1 text-sm text-gray-500">No results for &ldquo;{query}&rdquo;</p>
+        <p className="px-2 py-1 text-sm text-gray-500">{t('timezoneSelect.noResults', { query })}</p>
       )}
       {filtered.length > 0 && (
       <div
         id={listboxId}
         role="listbox"
-        aria-label="Timezones"
+        aria-label={t('timezoneSelect.listboxAriaLabel')}
         className="rounded bg-gray-900 overflow-y-auto max-h-40"
       >
         {filtered.map(({ tz, label }, index) => {
@@ -118,7 +120,7 @@ export function TimezoneSelect({ value, onChange, autoFocus, initialQuery }: Pro
       )}
       {query && (
         <p role="status" aria-live="polite" className="sr-only">
-          {filtered.length} {filtered.length === 1 ? 'timezone' : 'timezones'} found
+          {t('timezoneSelect.resultCount', { count: filtered.length })}
         </p>
       )}
     </div>

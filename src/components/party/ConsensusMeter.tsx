@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { Proposal } from '../../room/roomProtocol'
 
 interface Props {
@@ -20,6 +21,7 @@ function countAgreeing(proposals: Proposal[]): number {
 }
 
 export function ConsensusMeter({ proposals, participantCount }: Props) {
+  const { t } = useTranslation()
   const total = participantCount
   const agreeing = countAgreeing(proposals)
   const ratio = total === 0 ? 0 : agreeing / total
@@ -33,11 +35,11 @@ export function ConsensusMeter({ proposals, participantCount }: Props) {
         aria-atomic="true"
         className="text-xs text-gray-400"
       >
-        {agreeing} of {total} agree
+        {t('consensusMeter.agreeStatus', { agreeing, total })}
       </p>
       <div
         role="progressbar"
-        aria-label="Consensus"
+        aria-label={t('consensusMeter.progressAriaLabel')}
         aria-valuenow={agreeing}
         aria-valuemin={0}
         aria-valuemax={total}

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getAllFormats } from '../utils/discordTimestamp'
 import { DiscordIcon } from './DiscordIcon'
 
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export function DiscordExport({ timestamp, timezone }: Props) {
+  const { t } = useTranslation()
   const [copiedFlag, setCopiedFlag] = useState<string | null>(null)
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -40,14 +42,14 @@ export function DiscordExport({ timestamp, timezone }: Props) {
   return (
     <div ref={containerRef} className="flex flex-col gap-2">
       <button
-        aria-label="Discord timestamps"
+        aria-label={t('discordExport.toggleLabel')}
         aria-expanded={isOpen}
         onClick={() => setIsOpen(prev => !prev)}
         className="flex items-center justify-between w-full text-sm text-gray-300 hover:text-gray-100 py-1"
       >
         <span className="flex items-center gap-1.5">
           <DiscordIcon aria-hidden="true" className="w-4 h-4 text-indigo-400" />
-          Discord timestamps
+          {t('discordExport.toggleLabel')}
         </span>
         <span aria-hidden="true">{isOpen ? '▾' : '▸'}</span>
       </button>
@@ -61,12 +63,12 @@ export function DiscordExport({ timestamp, timezone }: Props) {
             <code className="text-xs text-indigo-400 font-mono truncate block">{code}</code>
           </div>
           <button
-            aria-label={`Copy ${label}`}
+            aria-label={t('discordExport.copyFormatAriaLabel', { label })}
             aria-live="polite"
             onClick={() => handleCopy(code, flag)}
             className="min-h-[44px] px-3 rounded bg-gray-700 hover:bg-gray-600 text-gray-200 text-xs shrink-0"
           >
-            {copiedFlag === flag ? 'Copied!' : 'Copy'}
+            {copiedFlag === flag ? t('common.copied') : t('discordExport.copy')}
           </button>
         </div>
       ))}

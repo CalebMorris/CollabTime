@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ROOM_CODE_RE } from '../../utils/appUrl'
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function PartyDeadRoom({ attemptedCode, onTryDifferent, onStartNew, onBackToSolo }: Props) {
+  const { t } = useTranslation()
   const [showInput, setShowInput] = useState(false)
   const [inputValue, setInputValue] = useState('')
   const isValid = ROOM_CODE_RE.test(inputValue)
@@ -20,9 +22,9 @@ export function PartyDeadRoom({ attemptedCode, onTryDifferent, onStartNew, onBac
         {/* Error message */}
         <div className="flex flex-col gap-2">
           <span className="text-4xl" aria-hidden="true">🚪</span>
-          <h1 className="text-2xl font-bold text-gray-100">Room not found</h1>
+          <h1 className="text-2xl font-bold text-gray-100">{t('partyDead.heading')}</h1>
           <p className="text-sm text-gray-400">
-            It may have expired or the code could be incorrect.
+            {t('partyDead.description')}
           </p>
           <p className="text-xs font-mono text-gray-500 mt-1">{attemptedCode}</p>
         </div>
@@ -34,12 +36,12 @@ export function PartyDeadRoom({ attemptedCode, onTryDifferent, onStartNew, onBac
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value.toLowerCase())}
-              placeholder="word-word-word"
+              placeholder={t('common.roomCodePlaceholder')}
               autoCapitalize="off"
               autoCorrect="off"
               spellCheck={false}
               inputMode="url"
-              aria-label="Party room code"
+              aria-label={t('common.roomCodeAriaLabel')}
               autoFocus
               className="min-h-[44px] w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm font-mono text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500"
             />
@@ -48,7 +50,7 @@ export function PartyDeadRoom({ attemptedCode, onTryDifferent, onStartNew, onBac
               disabled={!isValid}
               className="min-h-[44px] w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              Join
+              {t('partyDead.joinButton')}
             </button>
           </div>
         )}
@@ -60,20 +62,20 @@ export function PartyDeadRoom({ attemptedCode, onTryDifferent, onStartNew, onBac
               onClick={() => setShowInput(true)}
               className="min-h-[44px] w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-sm text-gray-200 hover:bg-gray-700"
             >
-              Try a Different Code
+              {t('partyDead.tryDifferent')}
             </button>
           )}
           <button
             onClick={onStartNew}
             className="min-h-[44px] w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
           >
-            Start a New Party
+            {t('partyDead.startNew')}
           </button>
           <button
             onClick={onBackToSolo}
             className="min-h-[44px] w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
           >
-            Go to Solo Mode
+            {t('partyDead.goToSolo')}
           </button>
         </div>
 

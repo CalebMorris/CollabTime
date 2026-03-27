@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { parseTime } from '../utils/parseTime'
 
 interface Props {
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export function TextImport({ onTime, externalValue = null }: Props) {
+  const { t } = useTranslation()
   const [input, setInput] = useState('')
 
   useEffect(() => {
@@ -34,20 +36,20 @@ export function TextImport({ onTime, externalValue = null }: Props) {
   return (
     <div className="flex flex-col gap-2">
       <textarea
-        aria-label="Enter time"
+        aria-label={t('textImport.ariaLabel')}
         aria-describedby={error ? 'time-input-error' : undefined}
         rows={2}
         value={input}
         onChange={e => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="e.g. tomorrow at 3pm, 2024-01-15T09:00:00Z, 1543392060"
+        placeholder={t('textImport.placeholder')}
         className="rounded bg-gray-800 px-2 py-1 text-sm text-gray-100 placeholder-gray-500 resize-none focus:outline-none focus:ring-1 focus:ring-indigo-500"
       />
       <button
         onClick={handleParse}
         className="self-start rounded bg-indigo-600 px-3 py-1 text-sm font-medium hover:bg-indigo-500"
       >
-        Parse
+        {t('textImport.parseButton')}
       </button>
       {error && (
         <p id="time-input-error" role="alert" className="text-sm text-red-400">

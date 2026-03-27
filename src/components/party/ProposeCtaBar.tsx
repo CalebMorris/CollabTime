@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { RoomPhase } from '../../room/roomProtocol'
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export function ProposeCtaBar({ timestamp, roomPhase, keyboardInset, onPropose }: Props) {
+  const { t } = useTranslation()
   const disabled = timestamp === null || roomPhase !== 'active'
 
   return (
@@ -20,7 +22,7 @@ export function ProposeCtaBar({ timestamp, roomPhase, keyboardInset, onPropose }
         disabled={disabled}
         className="min-h-[44px] w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        Propose This Time
+        {t('proposeCta.proposeButton')}
       </button>
     </div>
   )

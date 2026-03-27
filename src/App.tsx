@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useTimezone } from './hooks/useTimezone'
 import { useDeepLink } from './hooks/useDeepLink'
 import { usePartyMode } from './hooks/usePartyMode'
@@ -21,6 +22,7 @@ import { generateRoomCode } from './utils/partyLink'
 import { loadLockedParticipants } from './room/roomSession'
 
 function App() {
+  const { t } = useTranslation()
   const { timezone, setTimezone } = useTimezone()
   const [timestamp, setTimestamp] = useState<number | null>(null)
   const [importText, setImportText] = useState<string | null>(null)
@@ -112,7 +114,7 @@ function App() {
   return (
     <main className="min-h-screen bg-gray-950 text-gray-100 overflow-x-hidden">
       <header className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
-        <h1 className="text-lg font-bold tracking-tight">CollabTime</h1>
+        <h1 className="text-lg font-bold tracking-tight">{t('app.title')}</h1>
         <div className="relative" ref={timezonePickerRef}>
           <button
             aria-haspopup="listbox"
@@ -148,13 +150,13 @@ function App() {
               id="section-input"
               className="text-xs font-semibold tracking-widest uppercase text-gray-400 mb-3"
             >
-              Pick a Time
+              {t('common.pickATime')}
             </h2>
             <div className="rounded-lg border border-gray-800 bg-gray-900 p-4 flex flex-col gap-4">
               <TextImport onTime={handleSetTimestamp} externalValue={importText} />
               <div className="flex items-center gap-3 text-xs text-gray-400">
                 <div className="flex-1 border-t border-gray-800" />
-                <span>or</span>
+                <span>{t('common.or')}</span>
                 <div className="flex-1 border-t border-gray-800" />
               </div>
               <ManualSelector
@@ -170,7 +172,7 @@ function App() {
               id="section-result"
               className="text-xs font-semibold tracking-widest uppercase text-gray-400 mb-3"
             >
-              Result
+              {t('app.result')}
             </h2>
             <ConversionDisplay timestamp={timestamp} timezone={timezone} />
           </section>
@@ -188,7 +190,7 @@ function App() {
               id="section-export"
               className="text-xs font-semibold tracking-widest uppercase text-gray-500"
             >
-              Share &amp; Export
+              {t('common.shareAndExport')}
             </h2>
             <ShareLink timestamp={timestamp} />
             <CalendarExport timestamp={timestamp} />

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { Participant, Proposal } from '../../room/roomProtocol'
 import { ParticipantRow } from './ParticipantRow'
 import { ConsensusMeter } from './ConsensusMeter'
@@ -17,6 +18,7 @@ export function ProposalsBoard({
   viewerTimezone,
   isLocked,
 }: Props) {
+  const { t } = useTranslation()
   const proposalByToken = new Map(proposals.map((p) => [p.participantToken, p]))
   const connectedCount = participants.filter((p) => p.isConnected).length
   // Only connected participants' proposals count toward consensus
@@ -36,7 +38,7 @@ export function ProposalsBoard({
         id="proposals-heading"
         className="text-xs font-semibold tracking-widest uppercase text-gray-400"
       >
-        Proposals
+        {t('proposals.heading')}
       </h2>
 
       <div className="flex flex-col gap-1">
@@ -54,7 +56,7 @@ export function ProposalsBoard({
 
       {participants.length === 1 && (
         <p className="text-xs text-gray-500 text-center py-2">
-          Waiting for others to join... Share your code to invite them.
+          {t('proposals.waitingHint')}
         </p>
       )}
 

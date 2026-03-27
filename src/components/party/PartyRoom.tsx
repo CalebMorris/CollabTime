@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { RoomSocketFactory } from '../../room/RoomSocket'
 import type { Participant } from '../../room/roomProtocol'
 import { useRoom } from '../../hooks/useRoom'
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export function PartyRoom({ roomCode, onLeave, onLockIn, onDeadRoom, socketFactory }: Props) {
+  const { t } = useTranslation()
   const room = useRoom(roomCode, socketFactory)
   const { timezone } = useTimezone()
   const keyboardInset = useKeyboardInset()
@@ -85,10 +87,10 @@ export function PartyRoom({ roomCode, onLeave, onLockIn, onDeadRoom, socketFacto
         </div>
         <button
           onClick={handleLeave}
-          aria-label="Leave room"
+          aria-label={t('partyRoom.leaveAriaLabel')}
           className="min-h-[44px] rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-gray-100"
         >
-          Leave
+          {t('partyRoom.leaveButton')}
         </button>
       </header>
 
@@ -114,7 +116,7 @@ export function PartyRoom({ roomCode, onLeave, onLockIn, onDeadRoom, socketFacto
             <div className="flex flex-col items-center justify-center gap-4 h-full p-8">
               <ConnectionStatus phase={room.connectionPhase} />
               {room.errorCode && (
-                <p className="text-sm text-red-400">Error: {room.errorCode}</p>
+                <p className="text-sm text-red-400">{t('partyRoom.errorCode', { errorCode: room.errorCode })}</p>
               )}
             </div>
           ) : (
@@ -124,13 +126,13 @@ export function PartyRoom({ roomCode, onLeave, onLockIn, onDeadRoom, socketFacto
                   id="party-pick-heading"
                   className="text-xs font-semibold tracking-widest uppercase text-gray-400 mb-3"
                 >
-                  Pick a Time
+                  {t('common.pickATime')}
                 </h2>
                 <div className="rounded-lg border border-gray-800 bg-gray-900 p-4 flex flex-col gap-4">
                   <TextImport onTime={setTimestamp} externalValue={null} />
                   <div className="flex items-center gap-3 text-xs text-gray-400">
                     <div className="flex-1 border-t border-gray-800" />
-                    <span>or</span>
+                    <span>{t('common.or')}</span>
                     <div className="flex-1 border-t border-gray-800" />
                   </div>
                   <ManualSelector timezone={timezone} onTime={setTimestamp} value={timestamp} />
@@ -139,7 +141,7 @@ export function PartyRoom({ roomCode, onLeave, onLockIn, onDeadRoom, socketFacto
 
               {room.ownProposal && (
                 <p className="text-xs text-gray-500 text-center">
-                  Your current proposal is on the board. Pick a new time to update it.
+                  {t('partyRoom.ownProposalHint')}
                 </p>
               )}
             </div>
@@ -162,18 +164,19 @@ export function PartyRoom({ roomCode, onLeave, onLockIn, onDeadRoom, socketFacto
 }
 
 function ConnectionStatus({ phase }: { phase: string }) {
-  const labels: Record<string, string> = {
-    idle: 'Idle',
-    connecting: 'Connecting...',
-    joining: 'Joining...',
-    connected: 'Connected',
-    reconnecting: 'Reconnecting...',
-    connection_failed: 'Connection failed',
-    expired: 'Room expired',
+  const { t } = useTranslation()
+  const phaseKey: Record<string, string> = {
+    idle: 'partyRoom.connectionIdle',
+    connecting: 'partyRoom.connectionConnecting',
+    joining: 'partyRoom.connectionJoining',
+    connected: 'partyRoom.connectionConnected',
+    reconnecting: 'partyRoom.connectionReconnecting',
+    connection_failed: 'partyRoom.connectionFailed',
+    expired: 'partyRoom.connectionExpired',
   }
   return (
     <p className="text-sm text-gray-400" aria-live="polite">
-      {labels[phase] ?? phase}
+      {phaseKey[phase] ? t(phaseKey[phase]) : phase}
     </p>
   )
 }

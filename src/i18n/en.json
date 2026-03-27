@@ -1,0 +1,133 @@
+{
+  "common": {
+    "or": "or",
+    "copied": "Copied!",
+    "pickATime": "Pick a Time",
+    "shareAndExport": "Share & Export",
+    "privacyNotice": "Privacy: only proposed times are shared — no timezone data leaves your device.",
+    "roomCodePlaceholder": "word-word-word",
+    "roomCodeAriaLabel": "Party room code"
+  },
+  "app": {
+    "title": "CollabTime",
+    "result": "Result"
+  },
+  "textImport": {
+    "ariaLabel": "Enter time",
+    "placeholder": "e.g. tomorrow at 3pm, 2024-01-15T09:00:00Z, 1543392060",
+    "parseButton": "Parse"
+  },
+  "manualSelector": {
+    "label": "Date and time"
+  },
+  "conversionDisplay": {
+    "localTime": "Local time",
+    "utc": "UTC",
+    "in": "In",
+    "ago": "Ago",
+    "days": "days",
+    "hours": "hours",
+    "minutes": "minutes",
+    "seconds": "seconds"
+  },
+  "shareLink": {
+    "copyAriaLabel": "Copy link"
+  },
+  "calendarExport": {
+    "calendarEvent": "Calendar event",
+    "addToGoogleAriaLabel": "Add to Google Calendar",
+    "googleCalendar": "Google Calendar",
+    "downloadIcs": "Download .ics",
+    "downloadIcsAriaLabel": "Download .ics",
+    "downloaded": "Downloaded!"
+  },
+  "discordExport": {
+    "toggleLabel": "Discord timestamps",
+    "copyFormatAriaLabel": "Copy {{label}}",
+    "copy": "Copy"
+  },
+  "timezoneSelect": {
+    "searchAriaLabel": "Search timezones",
+    "placeholder": "Search timezones\u2026",
+    "typeToSearch": "Type to search timezones",
+    "noResults": "No results for \u201c{{query}}\u201d",
+    "listboxAriaLabel": "Timezones",
+    "resultCount_one": "{{count}} timezone found",
+    "resultCount_other": "{{count}} timezones found"
+  },
+  "coordinate": {
+    "heading": "Coordinate",
+    "startParty": "Start a Party",
+    "joinParty": "Join a Party"
+  },
+  "partyCreate": {
+    "title": "Your Party Room",
+    "subtitle": "Share this code or link to invite others.",
+    "copyCodeAriaLabel": "Copy code",
+    "copyCode": "Copy Code",
+    "copyLinkAriaLabel": "Copy link",
+    "copyLink": "Copy Link",
+    "enterRoom": "Enter the Room"
+  },
+  "partyJoin": {
+    "title": "Join a Party",
+    "subtitle": "Enter the three-word code shared with you.",
+    "formatError": "Format: word-word-word (three lowercase words)",
+    "joinButton": "Join Party"
+  },
+  "partyRoom": {
+    "leaveAriaLabel": "Leave room",
+    "leaveButton": "Leave",
+    "ownProposalHint": "Your current proposal is on the board. Pick a new time to update it.",
+    "errorCode": "Error: {{errorCode}}",
+    "connectionIdle": "Idle",
+    "connectionConnecting": "Connecting...",
+    "connectionJoining": "Joining...",
+    "connectionConnected": "Connected",
+    "connectionReconnecting": "Reconnecting...",
+    "connectionFailed": "Connection failed",
+    "connectionExpired": "Room expired"
+  },
+  "proposals": {
+    "heading": "Proposals",
+    "waitingHint": "Waiting for others to join... Share your code to invite them."
+  },
+  "participantRow": {
+    "you": "(You)",
+    "reconnecting": "Reconnecting...",
+    "left": "(left)"
+  },
+  "consensusMeter": {
+    "agreeStatus": "{{agreeing}} of {{total}} agree",
+    "progressAriaLabel": "Consensus"
+  },
+  "proposeCta": {
+    "proposeButton": "Propose This Time"
+  },
+  "lockInModal": {
+    "heading": "Locked In!",
+    "allOnBoard": "All {{participantCount}} on board",
+    "tapToContinue": "Tap anywhere to continue"
+  },
+  "nicknameDisplay": {
+    "prefix": "Your nickname:"
+  },
+  "reconnectingBanner": {
+    "reconnecting": "Reconnecting... {{secondsRemaining}}s",
+    "slotHeld": "Your slot is held"
+  },
+  "partyExport": {
+    "yourTime": "Your Time",
+    "onBoard": "On Board",
+    "newSession": "New Session",
+    "backToSolo": "Back to Solo Mode"
+  },
+  "partyDead": {
+    "heading": "Room not found",
+    "description": "It may have expired or the code could be incorrect.",
+    "joinButton": "Join",
+    "tryDifferent": "Try a Different Code",
+    "startNew": "Start a New Party",
+    "goToSolo": "Go to Solo Mode"
+  }
+}

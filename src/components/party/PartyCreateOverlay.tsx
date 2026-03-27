@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useFocusTrap } from '../../hooks/useFocusTrap'
 import { encodePartyRoomUrl } from '../../utils/appUrl'
 
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function PartyCreateOverlay({ roomCode, onEnterRoom, onDismiss }: Props) {
+  const { t } = useTranslation()
   const [codeCopied, setCodeCopied] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
   const dialogRef = useRef<HTMLDivElement>(null)
@@ -52,10 +54,10 @@ export function PartyCreateOverlay({ roomCode, onEnterRoom, onDismiss }: Props) 
           id="create-overlay-title"
           className="text-lg font-semibold text-gray-100 mb-1"
         >
-          Your Party Room
+          {t('partyCreate.title')}
         </h2>
         <p className="text-sm text-gray-400 mb-4">
-          Share this code or link to invite others.
+          {t('partyCreate.subtitle')}
         </p>
 
         {/* Room code display */}
@@ -68,18 +70,18 @@ export function PartyCreateOverlay({ roomCode, onEnterRoom, onDismiss }: Props) 
         {/* Copy buttons */}
         <div className="flex gap-2 mb-4">
           <button
-            aria-label="Copy code"
+            aria-label={t('partyCreate.copyCodeAriaLabel')}
             onClick={handleCopyCode}
             className="min-h-[44px] flex-1 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-200 hover:bg-gray-700"
           >
-            {codeCopied ? 'Copied!' : 'Copy Code'}
+            {codeCopied ? t('common.copied') : t('partyCreate.copyCode')}
           </button>
           <button
-            aria-label="Copy link"
+            aria-label={t('partyCreate.copyLinkAriaLabel')}
             onClick={handleCopyLink}
             className="min-h-[44px] flex-1 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-200 hover:bg-gray-700"
           >
-            {linkCopied ? 'Copied!' : 'Copy Link'}
+            {linkCopied ? t('common.copied') : t('partyCreate.copyLink')}
           </button>
         </div>
 
@@ -88,12 +90,12 @@ export function PartyCreateOverlay({ roomCode, onEnterRoom, onDismiss }: Props) 
           onClick={onEnterRoom}
           className="min-h-[44px] w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 mb-4"
         >
-          Enter the Room
+          {t('partyCreate.enterRoom')}
         </button>
 
         {/* Privacy notice */}
         <p className="text-xs text-gray-500 text-center">
-          Privacy: only proposed times are shared — no timezone data leaves your device.
+          {t('common.privacyNotice')}
         </p>
       </div>
     </div>

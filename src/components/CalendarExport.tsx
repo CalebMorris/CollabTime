@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { CalendarPlus, Download } from 'lucide-react'
 import { buildIcsContent, buildGoogleCalendarUrl } from '../utils/calendarExport'
 
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export function CalendarExport({ timestamp }: Props) {
+  const { t } = useTranslation()
   const [downloaded, setDownloaded] = useState(false)
 
   if (timestamp === null) return null
@@ -29,12 +31,12 @@ export function CalendarExport({ timestamp }: Props) {
   return (
     <div className="flex items-center gap-2 rounded bg-gray-800 px-3 py-2">
       <CalendarPlus aria-hidden="true" className="w-4 h-4 text-indigo-400 shrink-0" />
-      <span className="flex-1 text-sm text-gray-300">Calendar event</span>
+      <span className="flex-1 text-sm text-gray-300">{t('calendarExport.calendarEvent')}</span>
       <a
         href={googleCalendarUrl}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Add to Google Calendar"
+        aria-label={t('calendarExport.addToGoogleAriaLabel')}
         className="min-h-[44px] px-3 rounded bg-gray-700 hover:bg-gray-600 text-gray-200 text-xs shrink-0 flex items-center gap-1.5"
       >
         <svg aria-hidden="true" viewBox="0 0 24 24" className="w-3.5 h-3.5 shrink-0">
@@ -43,17 +45,17 @@ export function CalendarExport({ timestamp }: Props) {
           <path fill="#FBBC04" d="M5.3 10.3a5 5 0 0 1 2.9-2.9L5.4 4.6A9 9 0 0 0 2.1 8z"/>
           <path fill="#EA4335" d="M12 7a5 5 0 0 1 3.2 1.1l2.8-2.8A9 9 0 0 0 5.4 4.6l2.8 2.8A5 5 0 0 1 12 7Z"/>
         </svg>
-        Google Calendar
+        {t('calendarExport.googleCalendar')}
       </a>
       <button
-        aria-label="Download .ics"
+        aria-label={t('calendarExport.downloadIcsAriaLabel')}
         aria-live="polite"
         onClick={handleDownload}
         className="min-h-[44px] px-3 rounded bg-gray-700 hover:bg-gray-600 text-gray-200 text-xs shrink-0 flex items-center gap-1.5"
       >
         {downloaded
-          ? 'Downloaded!'
-          : <><Download aria-hidden="true" className="w-3.5 h-3.5" />Download .ics</>
+          ? t('calendarExport.downloaded')
+          : <><Download aria-hidden="true" className="w-3.5 h-3.5" />{t('calendarExport.downloadIcs')}</>
         }
       </button>
     </div>
