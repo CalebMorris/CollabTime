@@ -450,4 +450,40 @@ test.describe('Party room — leaving', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'CollabTime' })).toBeVisible()
     await expect(page.getByLabel('Enter time')).toBeVisible()
   })
+
+  test('"Leave" button clears the ?code= param from the URL', async ({ page }) => {
+    await mockServer(page, joinedMsg())
+    await enterRoomViaUrl(page)
+    await waitForRoomConnected(page)
+
+    await page.getByRole('button', { name: /leave/i }).click()
+
+    await expect(page.getByRole('heading', { level: 1, name: 'CollabTime' })).toBeVisible()
+    await expect(page).not.toHaveURL(/code=/)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Back to solo from export screen
+// ---------------------------------------------------------------------------
+
+test.describe('Party room — back to solo from export screen', () => {
+  const lockedMs = new Date('2025-06-15T14:00:00Z').getTime()
+
+  test('"Back to Solo Mode" clears the ?locked-in= param from the URL', async ({ page }) => {
+    const serverWs$ = await mockServer(page, joinedMsg())
+    await enterRoomViaCreateOverlay(page)
+    await waitForRoomConnected(page)
+
+    const serverWs = await serverWs$()
+    await serverWs.send(JSON.stringify({ type: 'locked_in', epochMs: lockedMs }))
+
+    await page.getByRole('alertdialog').click()
+    await expect(page.getByRole('alertdialog')).not.toBeVisible({ timeout: 2000 })
+
+    await page.getByRole('button', { name: /back to solo mode/i }).click()
+
+    await expect(page.getByRole('heading', { level: 1, name: 'CollabTime' })).toBeVisible()
+    await expect(page).not.toHaveURL(/locked-in=/)
+  })
 })
