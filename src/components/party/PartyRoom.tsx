@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import type { RoomSocketFactory } from '../../room/RoomSocket'
 import type { Participant } from '../../room/roomProtocol'
 import { useRoom } from '../../hooks/useRoom'
@@ -6,6 +6,7 @@ import { useTimezone } from '../../hooks/useTimezone'
 import { useKeyboardInset } from '../../hooks/useKeyboardInset'
 import { TextImport } from '../TextImport'
 import { ManualSelector } from '../ManualSelector'
+import { ConversionDisplay } from '../ConversionDisplay'
 import { RoomCodePill } from './RoomCodePill'
 import { NicknameDisplay } from './NicknameDisplay'
 import { ProposalsBoard } from './ProposalsBoard'
@@ -25,7 +26,15 @@ export function PartyRoom({ roomCode, onLeave, onLockIn, onDeadRoom, socketFacto
   const room = useRoom(roomCode, socketFactory)
   const { timezone } = useTimezone()
   const keyboardInset = useKeyboardInset()
+  const resultRef = useRef<HTMLElement | null>(null)
   const [timestamp, setTimestamp] = useState<number | null>(null)
+
+  const handleSetTimestamp = (ms: number) => {
+    setTimestamp(ms)
+    if (resultRef.current?.scrollIntoView) {
+      resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
 
   // Connect on mount
   useEffect(() => {
@@ -127,14 +136,24 @@ export function PartyRoom({ roomCode, onLeave, onLockIn, onDeadRoom, socketFacto
                   Pick a Time
                 </h2>
                 <div className="rounded-lg border border-gray-800 bg-gray-900 p-4 flex flex-col gap-4">
-                  <TextImport onTime={setTimestamp} externalValue={null} />
+                  <TextImport onTime={handleSetTimestamp} externalValue={null} />
                   <div className="flex items-center gap-3 text-xs text-gray-400">
                     <div className="flex-1 border-t border-gray-800" />
                     <span>or</span>
                     <div className="flex-1 border-t border-gray-800" />
                   </div>
-                  <ManualSelector timezone={timezone} onTime={setTimestamp} value={timestamp} />
+                  <ManualSelector timezone={timezone} onTime={handleSetTimestamp} value={timestamp} />
                 </div>
+              </section>
+
+              <section ref={resultRef} aria-labelledby="party-result-heading">
+                <h2
+                  id="party-result-heading"
+                  className="text-xs font-semibold tracking-widest uppercase text-gray-400 mb-3"
+                >
+                  Result
+                </h2>
+                <ConversionDisplay timestamp={timestamp} timezone={timezone} />
               </section>
 
               {room.ownProposal && (
