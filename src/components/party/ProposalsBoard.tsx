@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react'
 import type { Participant, Proposal } from '../../room/roomProtocol'
 import { ParticipantRow } from './ParticipantRow'
 import { ConsensusMeter } from './ConsensusMeter'
@@ -25,6 +26,27 @@ export function ProposalsBoard({
     return participant?.isConnected ?? false
   })
 
+  // Track which proposal was most recently updated for animation
+  const [recentlyProposed, setRecentlyProposed] = useState<string | null>(null)
+  const prevProposalsRef = useRef<Map<string, number>>(new Map())
+
+  useEffect(() => {
+    const currentProposals = new Map(proposals.map((p) => [p.participantToken, p.epochMs]))
+
+    // Find any participant whose epochMs changed (new or updated proposal)
+    for (const [token, epochMs] of currentProposals) {
+      const prevEpochMs = prevProposalsRef.current.get(token)
+      if (prevEpochMs === undefined || prevEpochMs !== epochMs) {
+        setRecentlyProposed(token)
+        const timer = setTimeout(() => setRecentlyProposed(null), 600)
+        prevProposalsRef.current = currentProposals
+        return () => clearTimeout(timer)
+      }
+    }
+
+    prevProposalsRef.current = currentProposals
+  }, [proposals])
+
   return (
     <section
       aria-labelledby="proposals-heading"
@@ -48,6 +70,7 @@ export function ProposalsBoard({
             isOwn={participant.participantToken === ownParticipantToken}
             viewerTimezone={viewerTimezone}
             isLocked={isLocked}
+            isRecentlyProposed={recentlyProposed === participant.participantToken}
           />
         ))}
       </div>

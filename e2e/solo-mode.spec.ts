@@ -174,6 +174,9 @@ test.describe('Share & Export panel', () => {
   })
 
   test('deep link copy button changes to "Copied!" and reverts', async ({ page }) => {
+    if (test.info().project.name === 'firefox') {
+      test.skip(true, 'Clipboard tests not supported in Firefox')
+    }
     // Grant clipboard permissions
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
 
@@ -184,14 +187,17 @@ test.describe('Share & Export panel', () => {
     await expect(copyButton).not.toHaveText('Copied!', { timeout: 4000 })
   })
 
-  test('deep link URL contains the ?t= parameter', async ({ page }) => {
+  test('deep link URL contains the ?time= parameter', async ({ page }) => {
+    if (test.info().project.name === 'firefox') {
+      test.skip(true, 'Clipboard tests not supported in Firefox')
+    }
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
 
     // The URL is shown inline as a <code> element
-    const codeEl = page.locator('code').filter({ hasText: '?t=' })
+    const codeEl = page.locator('code').filter({ hasText: '?time=' })
     await expect(codeEl).toBeVisible()
     const linkText = await codeEl.innerText()
-    expect(linkText).toMatch(/\?t=\d+/)
+    expect(linkText).toMatch(/\?time=\d+/)
   })
 
   test('Discord timestamps section expands on click', async ({ page }) => {
@@ -212,6 +218,9 @@ test.describe('Share & Export panel', () => {
   })
 
   test('Discord copy button changes to "Copied!" for the clicked format', async ({ page }) => {
+    if (test.info().project.name === 'firefox') {
+      test.skip(true, 'Clipboard tests not supported in Firefox')
+    }
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
 
     await page.getByRole('button', { name: /discord timestamps/i }).click()
@@ -229,17 +238,17 @@ test.describe('Share & Export panel', () => {
 })
 
 test.describe('Deep link navigation', () => {
-  test('?t= param pre-fills a timestamp on load', async ({ page }) => {
+  test('?time= param pre-fills a timestamp on load', async ({ page }) => {
     // 2025-01-01T00:00:00Z = unix 1735689600
-    await page.goto('.?t=1735689600')
+    await page.goto('.?time=1735689600')
 
     await expect(page.getByTestId('utc-time')).toContainText('2025')
     // Share & Export should already be visible
     await expect(page.getByRole('heading', { name: /share & export/i })).toBeVisible()
   })
 
-  test('?t= param with invalid value does not crash the page', async ({ page }) => {
-    await page.goto('.?t=notanumber')
+  test('?time= param with invalid value does not crash the page', async ({ page }) => {
+    await page.goto('.?time=notanumber')
     // App should still load normally in solo mode
     await expect(page.getByRole('heading', { level: 1, name: 'CollabTime' })).toBeVisible()
     await expect(page.getByTestId('result-placeholder')).toBeVisible()
