@@ -127,7 +127,7 @@ export function PartyRoom({ roomCode, onLeave, onLockIn, onDeadRoom, socketFacto
               )}
             </div>
           ) : (
-            <div className="max-w-md mx-auto px-4 py-6 pb-24 flex flex-col gap-6">
+            <div className="max-w-md mx-auto px-4 pt-6 pb-28 md:py-6 flex flex-col gap-6">
               <section aria-labelledby="party-pick-heading">
                 <h2
                   id="party-pick-heading"
@@ -143,6 +143,14 @@ export function PartyRoom({ roomCode, onLeave, onLockIn, onDeadRoom, socketFacto
                     <div className="flex-1 border-t border-gray-800" />
                   </div>
                   <ManualSelector timezone={timezone} onTime={handleSetTimestamp} value={timestamp} />
+                  {/* Desktop: inline CTA inside the card */}
+                  <div className="hidden md:block">
+                    <ProposeCtaBar
+                      timestamp={timestamp}
+                      roomPhase={room.roomPhase}
+                      onPropose={handlePropose}
+                    />
+                  </div>
                 </div>
               </section>
 
@@ -157,7 +165,7 @@ export function PartyRoom({ roomCode, onLeave, onLockIn, onDeadRoom, socketFacto
               </section>
 
               {room.ownProposal && (
-                <p className="text-xs text-gray-500 text-center">
+                <p className="hidden md:block text-xs text-gray-500 text-center">
                   Your current proposal is on the board. Pick a new time to update it.
                 </p>
               )}
@@ -167,14 +175,23 @@ export function PartyRoom({ roomCode, onLeave, onLockIn, onDeadRoom, socketFacto
 
       </div>
 
-      {/* Sticky propose CTA — only shown when connected */}
+      {/* Mobile: pinned CTA bar, floats above the virtual keyboard */}
       {isConnected && (
-        <ProposeCtaBar
-          timestamp={timestamp}
-          roomPhase={room.roomPhase}
-          keyboardInset={keyboardInset}
-          onPropose={handlePropose}
-        />
+        <div
+          className="md:hidden fixed left-0 right-0 z-20 border-t border-gray-800 bg-gray-950/95 backdrop-blur-sm px-4 py-3"
+          style={{ bottom: keyboardInset }}
+        >
+          {room.ownProposal && (
+            <p className="text-xs text-gray-500 text-center mb-2">
+              Your current proposal is on the board. Pick a new time to update it.
+            </p>
+          )}
+          <ProposeCtaBar
+            timestamp={timestamp}
+            roomPhase={room.roomPhase}
+            onPropose={handlePropose}
+          />
+        </div>
       )}
     </div>
   )
