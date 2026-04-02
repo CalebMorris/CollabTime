@@ -10,7 +10,6 @@ describe('ProposeCtaBar', () => {
       <ProposeCtaBar
         timestamp={EPOCH_MS}
         roomPhase="active"
-        keyboardInset={0}
         onPropose={vi.fn()}
       />,
     )
@@ -22,7 +21,6 @@ describe('ProposeCtaBar', () => {
       <ProposeCtaBar
         timestamp={null}
         roomPhase="active"
-        keyboardInset={0}
         onPropose={vi.fn()}
       />,
     )
@@ -34,7 +32,6 @@ describe('ProposeCtaBar', () => {
       <ProposeCtaBar
         timestamp={EPOCH_MS}
         roomPhase="waiting"
-        keyboardInset={0}
         onPropose={vi.fn()}
       />,
     )
@@ -46,7 +43,6 @@ describe('ProposeCtaBar', () => {
       <ProposeCtaBar
         timestamp={EPOCH_MS}
         roomPhase={null}
-        keyboardInset={0}
         onPropose={vi.fn()}
       />,
     )
@@ -58,7 +54,6 @@ describe('ProposeCtaBar', () => {
       <ProposeCtaBar
         timestamp={EPOCH_MS}
         roomPhase="active"
-        keyboardInset={0}
         onPropose={vi.fn()}
       />,
     )
@@ -71,7 +66,6 @@ describe('ProposeCtaBar', () => {
       <ProposeCtaBar
         timestamp={EPOCH_MS}
         roomPhase="active"
-        keyboardInset={0}
         onPropose={onPropose}
       />,
     )
@@ -79,29 +73,16 @@ describe('ProposeCtaBar', () => {
     expect(onPropose).toHaveBeenCalledOnce()
   })
 
-  it('applies bottom offset for keyboard inset', () => {
-    const { container } = render(
-      <ProposeCtaBar
-        timestamp={EPOCH_MS}
-        roomPhase="active"
-        keyboardInset={300}
-        onPropose={vi.fn()}
-      />,
-    )
-    const bar = container.firstChild as HTMLElement
-    expect(bar.style.bottom).toBe('300px')
-  })
-
-  it('has min-h-[44px] touch target on the button', () => {
+  it('has large prominent button styling', () => {
     render(
       <ProposeCtaBar
         timestamp={EPOCH_MS}
         roomPhase="active"
-        keyboardInset={0}
         onPropose={vi.fn()}
       />,
     )
     const btn = screen.getByRole('button', { name: /propose this time/i })
-    expect(btn.className).toContain('min-h-[44px]')
+    expect(btn.className).toContain('min-h-[56px]')
+    expect(btn.className).toContain('text-lg')
   })
 })

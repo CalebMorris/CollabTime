@@ -110,6 +110,28 @@ describe('PartyRoom', () => {
     expect(screen.getByText(/teal fox/i)).toBeDefined()
   })
 
+  it('shows result section when a time is selected', () => {
+    const { factory, getInstance } = makeFakeFactory()
+    render(
+      <PartyRoom
+        roomCode="amber-falcon-falcon"
+        onLeave={vi.fn()}
+        socketFactory={factory}
+      />,
+    )
+    getInstance().simulateOpen()
+    getInstance().simulateMessage({
+      type: 'joined',
+      participantToken: 'pt-1',
+      sessionToken: 'st-1',
+      nickname: 'Teal Fox',
+      protocolVersion: '1.0',
+      room: { state: 'waiting', participants: [], lockedInEpochMs: null },
+    })
+    expect(screen.getByText('Local time')).toBeDefined()
+    expect(screen.getByText('UTC')).toBeDefined()
+  })
+
   it('calls onLeave and disconnects when Leave is clicked', () => {
     const { factory, getInstance } = makeFakeFactory()
     const onLeave = vi.fn()

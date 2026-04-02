@@ -117,18 +117,28 @@ describe('usePartyMode — URL sync', () => {
   })
 
   it('does not update URL for overlay modes', () => {
-    const replaceState = vi.spyOn(window.history, 'replaceState')
     const { result } = renderHook(() => usePartyMode())
+    const replaceState = vi.spyOn(window.history, 'replaceState')
     act(() => result.current.startParty())
     act(() => result.current.joinParty())
     expect(replaceState).not.toHaveBeenCalled()
   })
 
-  it('does not update URL when transitioning back to solo', () => {
+  it('clears URL to bare pathname when transitioning back to solo from party-room', () => {
+    window.history.replaceState({}, '', '/?code=purple-falcon-bridge')
     const { result } = renderHook(() => usePartyMode())
     act(() => result.current.enterRoom('purple-falcon-bridge'))
     const replaceState = vi.spyOn(window.history, 'replaceState')
     act(() => result.current.backToSolo())
-    expect(replaceState).not.toHaveBeenCalled()
+    expect(replaceState).toHaveBeenCalledWith(expect.anything(), '', '/')
+  })
+
+  it('clears URL to bare pathname when transitioning back to solo from party-locked', () => {
+    window.history.replaceState({}, '', '/?locked-in=purple-falcon-bridge&time=1711209600000')
+    const { result } = renderHook(() => usePartyMode())
+    act(() => result.current.lockIn('purple-falcon-bridge', 1711209600000))
+    const replaceState = vi.spyOn(window.history, 'replaceState')
+    act(() => result.current.backToSolo())
+    expect(replaceState).toHaveBeenCalledWith(expect.anything(), '', '/')
   })
 })

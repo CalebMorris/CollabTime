@@ -15,7 +15,7 @@ export function ParticipantRow({ participant, proposal, isOwn, viewerTimezone, i
   const isDisconnected = !participant.isConnected && proposal === null
 
   const rowClass = [
-    'flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm transition-colors duration-300',
+    'flex items-start justify-between gap-3 px-3 py-2 rounded-lg text-sm transition-colors duration-300',
     isOwn ? 'border-l-2 border-indigo-500 pl-2 bg-gray-800/50' : '',
     isReconnecting || isDisconnected ? 'opacity-60' : '',
     isRecentlyProposed ? 'bg-indigo-500/20 ring-2 ring-indigo-400 ring-opacity-50' : '',

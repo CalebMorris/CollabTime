@@ -13,7 +13,7 @@ export function usePartyMode() {
     detectInitialMode(window.location.search),
   )
 
-  // Sync URL when entering persistent party states
+  // Sync URL when entering persistent party states, or clear it when returning to solo
   useEffect(() => {
     if (appMode.kind === 'party-room') {
       window.history.replaceState({}, '', encodePartyRoomUrl(appMode.roomCode))
@@ -23,6 +23,8 @@ export function usePartyMode() {
         '',
         encodePartyLockedUrl(appMode.roomCode, appMode.confirmedMs),
       )
+    } else if (appMode.kind === 'solo') {
+      window.history.replaceState({}, '', window.location.pathname)
     }
   }, [appMode])
 
