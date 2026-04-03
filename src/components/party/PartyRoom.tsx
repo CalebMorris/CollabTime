@@ -113,6 +113,10 @@ export function PartyRoom({ roomCode, onLeave, onLockIn, onDeadRoom, socketFacto
               ownParticipantToken={room.ownParticipantToken}
               viewerTimezone={timezone}
               isLocked={room.roomPhase === 'locked_in'}
+              onAgree={(epochMs) => {
+                setTimestamp(epochMs)
+                room.propose(epochMs)
+              }}
             />
           </aside>
         )}
