@@ -152,6 +152,15 @@ Three layers — no router, no global state library:
 - `room_activated` carries a full participant snapshot in `msg.participants` — update the full participants array when handling this message, not just the `roomPhase` field.
 - Server may omit optional fields entirely (send `undefined`) rather than `null` — use loose `!= null` checks when filtering optional fields like `proposalEpochMs`.
 
+### Capacity check
+
+The server exposes `GET /capacity` → `{ accepting_rooms: boolean, reason: null | "HIGH_LOAD" }` (rate-limited: 10 req/60 s per IP; always HTTP 200 even when at capacity).
+
+- `src/utils/fetchPartyCapacity.ts` — fetches the endpoint. **Fails closed** (returns `false`) on network error or non-OK response; 429 fails open (server is alive, WS may still work). Derives the HTTP base URL from `VITE_WS_URL` via `wsUrlToHttpBase` (`ws://host/ws` → `http://host`).
+- `src/hooks/usePartyCapacity.ts` — calls `fetchPartyCapacity` once on mount. If unavailable, polls every 30 s until capacity opens; stops polling once `accepting_rooms` is `true`. Accepts an injectable `fetcher` parameter for testing (use `vi.useFakeTimers()` + `vi.advanceTimersByTimeAsync` for polling tests).
+- `CoordinateSection` and `PartyJoinOverlay` both accept `accepting: boolean` and `loadingCapacity: boolean` props. When capacity is unavailable: show "Party rooms are temporarily unavailable." banner and set `aria-disabled` on the affected button(s). The deep-link join path (`?code=`) bypasses `CoordinateSection`, so `PartyJoinOverlay` must also receive these props.
+- `toHaveAttribute` is **not available** in this project (no jest-dom) — use `element.getAttribute('aria-disabled')` instead.
+
 ### Testing: WebSocket hooks
 
 - `useRoom` accepts an injectable `socketFactory?: () => RoomSocket` parameter — avoids patching `globalThis.WebSocket`
