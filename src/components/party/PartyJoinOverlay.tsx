@@ -6,19 +6,22 @@ interface Props {
   initialCode: string | null
   onJoin: (code: string) => void
   onDismiss: () => void
+  accepting: boolean
+  loadingCapacity: boolean
 }
 
-export function PartyJoinOverlay({ initialCode, onJoin, onDismiss }: Props) {
+export function PartyJoinOverlay({ initialCode, onJoin, onDismiss, accepting, loadingCapacity }: Props) {
   const [inputValue, setInputValue] = useState(initialCode ?? '')
   const isPreFilled = initialCode !== null
   const isValid = ROOM_CODE_RE.test(inputValue)
   const showError = inputValue.length > 0 && !isValid
+  const capacityDisabled = loadingCapacity || !accepting
 
   const dialogRef = useRef<HTMLDivElement>(null)
   useFocusTrap(dialogRef, onDismiss)
 
   const handleSubmit = () => {
-    if (isValid) onJoin(inputValue)
+    if (isValid && !capacityDisabled) onJoin(inputValue)
   }
 
   return (
@@ -80,11 +83,17 @@ export function PartyJoinOverlay({ initialCode, onJoin, onDismiss }: Props) {
         {/* Spacer to keep layout stable when no error */}
         {!showError && <div className="mb-3" />}
 
+        {/* Capacity unavailable banner */}
+        {!loadingCapacity && !accepting && (
+          <p className="text-sm text-gray-400 mb-3">Party rooms are temporarily unavailable.</p>
+        )}
+
         {/* Join CTA */}
         <button
           onClick={handleSubmit}
           disabled={!isValid}
-          className="min-h-[44px] w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed mb-4"
+          aria-disabled={capacityDisabled || undefined}
+          className="min-h-[44px] w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed aria-disabled:opacity-40 aria-disabled:cursor-not-allowed mb-4"
         >
           Join Party
         </button>

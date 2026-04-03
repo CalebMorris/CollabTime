@@ -234,6 +234,8 @@ function App() {
           initialCode={appMode.code}
           onJoin={(code) => enterRoom(code)}
           onDismiss={backToSolo}
+          accepting={partyAccepting}
+          loadingCapacity={partyCapacityLoading}
         />
       )}
 
