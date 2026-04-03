@@ -132,7 +132,7 @@ describe('Accessibility: party system components', () => {
 
   it('CoordinateSection', async () => {
     const { container } = render(
-      <CoordinateSection onStartParty={vi.fn()} onJoinParty={vi.fn()} />,
+      <CoordinateSection onStartParty={vi.fn()} onJoinParty={vi.fn()} accepting={true} loadingCapacity={false} />,
     )
     expect(await axe(container)).toHaveNoViolations()
   })
@@ -150,7 +150,7 @@ describe('Accessibility: party system components', () => {
 
   it('PartyJoinOverlay — empty state', async () => {
     const { container } = render(
-      <PartyJoinOverlay initialCode={null} onJoin={vi.fn()} onDismiss={vi.fn()} />,
+      <PartyJoinOverlay initialCode={null} onJoin={vi.fn()} onDismiss={vi.fn()} accepting={true} loadingCapacity={false} />,
     )
     expect(await axe(container)).toHaveNoViolations()
   })
@@ -161,6 +161,8 @@ describe('Accessibility: party system components', () => {
         initialCode="amber-falcon-bridge"
         onJoin={vi.fn()}
         onDismiss={vi.fn()}
+        accepting={true}
+        loadingCapacity={false}
       />,
     )
     expect(await axe(container)).toHaveNoViolations()
@@ -168,7 +170,7 @@ describe('Accessibility: party system components', () => {
 
   it('PartyJoinOverlay — valid code entered', async () => {
     const { container, getByRole } = render(
-      <PartyJoinOverlay initialCode={null} onJoin={vi.fn()} onDismiss={vi.fn()} />,
+      <PartyJoinOverlay initialCode={null} onJoin={vi.fn()} onDismiss={vi.fn()} accepting={true} loadingCapacity={false} />,
     )
     fireEvent.change(getByRole('textbox'), { target: { value: 'amber-falcon-bridge' } })
     expect(await axe(container)).toHaveNoViolations()
