@@ -29,7 +29,7 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          VITE_WS_URL: ${{ secrets.VITE_WS_URL }}
+          VITE_WS_URL: ${{ vars.VITE_WS_URL }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
