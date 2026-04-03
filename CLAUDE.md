@@ -5,174 +5,118 @@ Timezone coordination tool. Users pick a time in their timezone; others see it i
 ## Stack
 
 - React 19, TypeScript, Tailwind CSS 4
-- Vite (dev server + build)
-- ESLint 9 (flat config, `eslint.config.js`) with `typescript-eslint`, `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh`, `eslint-plugin-jsx-a11y`
-- Vitest + Testing Library (tests)
-- chrono-node (natural language date parsing)
-
-### chrono-node timezone behaviour
-
-chrono-node maps `EST`/`CST`/`MST`/`PST` to **fixed offsets** (e.g. EST = UTC-5 always). It separately provides DST-aware region codes: `ET`, `CT`, `MT`, `PT`. To handle the common case where users write "EST" year-round meaning "Eastern time", `parseTime` normalises the four standard abbreviations to their region counterparts before parsing (`src/utils/parseTime.ts`). The region codes honour US DST transitions automatically.
+- Vite, ESLint 9 (flat config), Vitest + Testing Library, chrono-node
+- chrono-node: normalizes `EST`/`CST`/`MST`/`PST` → DST-aware `ET`/`CT`/`MT`/`PT` in `src/utils/parseTime.ts`
 
 ## Commands
 
 ```
 npm run dev           # start dev server
 npm run build         # type-check + build
-npm run test          # run tests (watch mode)
+npm run test          # watch mode
 npm run lint          # eslint
-npm run coverage      # test coverage
-npm run test:e2e      # Playwright integration tests (requires dev server on localhost:5173)
-npm run test:e2e:ui   # Playwright UI mode (for debugging)
+npm run test:e2e      # Playwright (requires dev server on localhost:5173)
+npm run test:e2e:ui   # Playwright UI mode
 ```
 
 ## Linting
 
-Config: `eslint.config.js` (ESLint 9 flat config). Run with `npm run lint`.
-
-**Enabled rule sets:**
-- `@eslint/js` recommended
-- `typescript-eslint` recommended
-- `eslint-plugin-react-hooks` recommended
-- `eslint-plugin-jsx-a11y` recommended (with `no-autofocus` disabled — `autoFocus` is intentionally used for modal focus management per WCAG)
-
-**Intentional suppressions** (do not remove without understanding the pattern):
-- `jsx-a11y/no-autofocus` — disabled globally; `autoFocus` is correct practice for moving focus into modals
-- `jsx-a11y/click-events-have-key-events` + `jsx-a11y/interactive-supports-focus` on `role="option"` divs in `TimezoneSelect` — keyboard navigation uses the `aria-activedescendant` pattern on the parent input; options are not tab-focusable by design
-- `jsx-a11y/no-noninteractive-element-interactions` + `jsx-a11y/click-events-have-key-events` on `LockInModal`'s `role="alertdialog"` div — the full-screen overlay is intentionally click-to-dismiss; Escape is handled separately
-- `prefer-const` on `thisSocket` in `useRoom.ts` — declared before callbacks (which close over it) then assigned once; cannot be `const` without moving the assignment inline, which TypeScript would flag as a TDZ reference in closures
-- `@typescript-eslint/no-this-alias` in `RoomSocket.test.ts` — test helper captures `this` to track the active mock WebSocket instance; the rule targets `const self = this` antipatterns and fires as a false positive here
-
-**Backdrop divs** in `PartyCreateOverlay` and `PartyJoinOverlay` use `role="presentation"` to suppress jsx-a11y warnings — this is the correct semantic for a click-outside-to-dismiss overlay layer.
+Config: `eslint.config.js`. **Intentional suppressions** (do not remove):
+- `jsx-a11y/no-autofocus` — `autoFocus` correct for modals per WCAG
+- `TimezoneSelect` `role="option"` divs — keyboard via `aria-activedescendant`, not tab-focusable
+- `LockInModal` `role="alertdialog"` click-to-dismiss overlay — Escape handled separately
+- `thisSocket` in `useRoom.ts` — declared before callbacks, assigned once; cannot be `const` (TDZ ref)
+- `RoomSocket.test.ts` — test helper `this` capture (false positive)
+- `PartyCreateOverlay` / `PartyJoinOverlay` backdrop `role="presentation"` — correct semantic for click-outside-dismiss
 
 ## Conventions
 
-- Use `jq` instead of Python for parsing JSON in shell scripts or commands
-- Use descriptive variable names that convey context; avoid short single-word names (e.g. prefer `selectedTimezone` over `tz`, `parsedTimestamp` over `ts`)
-- Avoid abbreviated names for library/API objects (e.g. prefer `roomSocket`, `webSocket`, or `socket` over `ws`)
+- Use `jq` for JSON parsing, not Python
+- Descriptive names (`selectedTimezone` not `tz`; `roomSocket` not `ws`)
+- Write failing test first (red-green TDD); tests live alongside source (`*.test.ts` / `*.test.tsx`)
 
 ## Testing
 
-Use red-green TDD. Write a failing test first, then implement. Tests live alongside source files (`*.test.ts` / `*.test.tsx`).
+Vitest excludes `e2e/**` in `vite.config.ts`.
 
-Vitest is configured with `exclude: ['**/e2e/**']` in `vite.config.ts` to prevent Playwright spec files from being picked up by the unit test runner.
-
-### E2E tests (Playwright)
-
-Tests live in `e2e/`. Three files:
+### E2E (Playwright)
 
 | File | Scope |
 |---|---|
-| `e2e/solo-mode.spec.ts` | Page load, text import, manual selector, timezone picker, export panel, deep links |
-| `e2e/party-overlays.spec.ts` | Create/join overlays — modal behaviour, validation, clipboard, focus trap |
-| `e2e/party-ws.spec.ts` | Party room flows — uses `page.routeWebSocket()` to mock the server, no live WS needed |
+| `e2e/solo-mode.spec.ts` | Page load, import, timezone picker, export, deep links |
+| `e2e/party-overlays.spec.ts` | Create/join overlays, modals, validation, clipboard, focus trap |
+| `e2e/party-ws.spec.ts` | Party flows; `page.routeWebSocket()` mocks server |
 
-**Prerequisites before running e2e tests:**
+**Prerequisites:** `npx playwright install` (once), dev server running, `BASE_URL` env var (default: `http://localhost:5173/CollabTime/`)
 
-1. Browser binaries must be installed (one-time): `npx playwright install`
-2. The dev server must be running: `npm run dev`
-3. Target URL is configurable via `BASE_URL` env var (default: `http://localhost:5173/CollabTime/`)
+**Clipboard tests:** Chromium only (WebKit/Firefox no-op); use `page.context().grantPermissions()`.
 
-**Clipboard tests** call `page.context().grantPermissions(['clipboard-read', 'clipboard-write'])` — this works in Chromium but is a no-op in WebKit/Firefox where the clipboard API behaves differently. Clipboard assertions are therefore most reliable on the `chromium` project.
+**WS mocking:** `wsRoute.onMessage(handler)`, `wsRoute.send(jsonString)`, `wsRoute.close()`; payloads match `src/room/roomProtocol.ts`.
 
-**Party-room WS tests** intercept the WebSocket via `page.routeWebSocket(/.*/)`. The handler receives a `WebSocketRoute` object. Key API:
-- `wsRoute.onMessage(handler)` — receive messages sent by the page (method call, not property assignment)
-- `wsRoute.send(jsonString)` — push a server message to the page
-- `wsRoute.close()` — simulate a server-side disconnect
+**React StrictMode double-invoke:** Call `serverWs$()` **after** `waitForRoomConnected` (not before). `mockServer()` tracks `latestWs` to overwrite on reconnect.
 
-Message payloads must be JSON strings matching the protocol types in `src/room/roomProtocol.ts`.
+**Reconnect:** Set `shouldRespond = false` before `serverWs.close()` to keep "reconnecting" banner visible for assertions.
 
-**React StrictMode double-invoke:** In development, React double-invokes effects, which creates two WebSocket connections per room mount — the first is cleaned up immediately, the second is the live one. Always call the `serverWs$()` getter **after** `waitForRoomConnected` (not before) to receive the active connection. The `mockServer()` helper in `party-ws.spec.ts` handles this by tracking the most recently opened socket (`latestWs`), overwriting on each new connection.
+**Timing:** Never use `vi.useFakeTimers()` in e2e tests (Playwright manages real time). Prefer `expect(...).toBeVisible({ timeout: N })` over `page.waitForTimeout()`.
 
-**Reconnect tests:** After `serverWs.close()`, the app immediately reconnects. To keep the "reconnecting" banner visible long enough to assert, set a `shouldRespond = false` flag before closing so the reconnect WS hangs without a response.
+**Axe tests:** Never pair `vi.useFakeTimers()` + `axe()` (fake timers block async, cause cascading failures). Test timing separately.
 
-**Do not** add `vi.useFakeTimers()` to e2e tests — Playwright manages real browser time. Use `page.waitForTimeout()` sparingly (prefer `expect(...).toBeVisible({ timeout: N })` instead).
-
-### Axe / accessibility tests
-
-Never use `vi.useFakeTimers()` in the same test as `axe()` — fake timers block axe's internal async machinery, causing a 5s timeout and cascading "axe is already running" failures in all subsequent tests. Test timing behaviour in separate non-axe tests.
-
-### Timezone parsing tests
-
-For any test involving a timezone abbreviation in natural language input, always cover:
-1. **During DST** (e.g. ref date in March) — US standard abbreviations like `EST` are colloquially used year-round
-2. **During standard time** (e.g. ref date in January) — verify the offset is still correct when DST is not active
-3. **Round-trip assertion** — parse `"8PM EST"` and confirm the timestamp displays back as `8PM` in the relevant IANA timezone (not just check UTC). This catches off-by-one-hour bugs that pass UTC checks but produce wrong local times.
+**Timezone parsing tests:** Cover (1) DST period (March ref date), (2) standard time (January ref date), (3) round-trip assertion (`"8PM EST"` → displays as `8PM` in IANA tz, not just UTC check).
 
 ## Accessibility
 
-Keep accessibility up to date alongside any UI/UX change:
-- Update ARIA roles, labels, and attributes when markup changes
-- Ensure keyboard navigation and focus order remain correct
-- Add or update `a11y.test.tsx` coverage for new/changed interactive elements
-- For motion effects (confetti, animations): **omit the element entirely** when `prefers-reduced-motion: reduce` — do not just hide it
-- `role="progressbar"` must have an accessible name — add `aria-label`, `aria-labelledby`, or `title`; axe will fail without one
-- `aria-live` is invalid on `<button>` elements — place it on a non-interactive sibling `<span>` or `<div>`; screen readers may silently ignore it on interactive elements
-- Modal dialogs (`role="dialog"` / `role="alertdialog"`) require: (1) focus moved into dialog on open, (2) Tab cycles within dialog only (focus trap), (3) Escape key closes and returns focus to the trigger
-- `LockInModal` uses `role="alertdialog"` — use `getByRole('alertdialog')` in tests, not `getByRole('dialog')`
-- The timezone picker (`TimezoneSelect`) uses `role="combobox"` for its search input — use `getByRole('combobox', { name: /search timezones/i })` in tests, not `[role="listbox"]`; the picker closes on click-outside only (no Escape handler)
-- Tailwind's `animate-pulse` is **not** guarded by `prefers-reduced-motion` — use `motion-safe:animate-pulse` or a custom CSS animation with a `@media (prefers-reduced-motion: reduce)` guard
+- Update ARIA roles/labels/attributes with markup changes
+- Motion effects: **omit entirely** for `prefers-reduced-motion: reduce` (don't hide)
+- `role="progressbar"` needs accessible name (`aria-label` / `aria-labelledby` / `title`)
+- `aria-live` invalid on `<button>` — place on sibling `<span>` / `<div>`
+- Modal dialogs require: (1) focus into dialog on open, (2) Tab trap, (3) Escape closes + restores focus
+- `LockInModal`: use `getByRole('alertdialog')` in tests
+- `TimezoneSelect`: use `getByRole('combobox', { name: /search timezones/i })`; closes on click-outside (no Escape)
+- Tailwind `animate-pulse` unguarded — use `motion-safe:animate-pulse` or `@media (prefers-reduced-motion: reduce)`
 
 ## Party System
 
-### Architecture
+**Architecture:** Layer 1 `src/room/` (pure TS, WS + protocol), Layer 2 `src/hooks/` (`useRoom`, `usePartyMode`), Layer 3 `src/components/party/` (UI). `AppMode` discriminated union in `App.tsx` drives solo/party switching. `useDeepLink` solo-only; party manages URL via `usePartyMode`.
 
-Three layers — no router, no global state library:
+**State persistence:** `sessionStorage` namespaced by `roomCode`.
 
-- **Layer 1** `src/room/` — pure TS WebSocket transport + protocol types (no React)
-- **Layer 2** `src/hooks/` — `useRoom` (WS state machine), `usePartyMode` (view routing)
-- **Layer 3** `src/components/party/` — all party UI components
-
-`AppMode` discriminated union in `App.tsx` drives view switching between solo and party screens. `useDeepLink` is **gated to solo mode only** (`appMode.kind === 'solo'`) — party mode manages its own URL state via `usePartyMode`.
-
-### State persistence
-
-`sessionStorage` keys are namespaced by `roomCode` to prevent stale-token collisions across rooms.
-
-### Product/UX decisions
+**UX decisions:**
 
 | Decision | Rule |
 |---|---|
-| Proposals board timezones | Viewer's own timezone only — **no TZ labels** on any row |
-| Dead room errors | Generic "Room not found" for all `ROOM_NOT_FOUND` errors — no oracle leakage |
-| Post lock-in export | **Nicknames only** — no timezone info shown |
-| Nickname re-roll | **Dropped from MVP** — auto-generated nickname is fixed for the session |
-| Lock-in modal | Auto-dismisses after 2500ms; tappable/clickable to skip early |
+| Proposals board | Viewer's timezone only, no TZ labels |
+| Dead room errors | Generic "Room not found" for all `ROOM_NOT_FOUND` (no oracle) |
+| Post lock-in export | Nicknames only, no timezone |
+| Nickname re-roll | Dropped from MVP (fixed per session) |
+| Lock-in modal | Auto-dismiss 2500ms, tappable to skip |
 
-### URL parameters
+**URL params:**
 
 | Parameter | Format | Effect |
 |---|---|---|
-| `?code=<roomCode>` | `adjective-noun-noun` | Pre-fills join overlay (read-only); user taps [Join Party] to connect |
-| `?locked-in=<roomCode>&time=<epochMs>` | room code + Unix ms | Opens export screen directly with confirmed time |
+| `?code=<roomCode>` | `adjective-noun-noun` | Pre-fills join (read-only) |
+| `?locked-in=<roomCode>&time=<epochMs>` | code + Unix ms | Export screen directly |
 
-### Server protocol notes
+**Server protocol:**
+- `join` always creates if missing — `ROOM_NOT_FOUND` only on locked/expired/rejoin-fail; no client "exists check"
+- `room_activated` carries full `msg.participants` snapshot — update entire array, not just phase
+- Optional fields sent as `undefined`, not `null` — use `!= null` checks
 
-- `join` **always creates** a new room if the code doesn't exist — `ROOM_NOT_FOUND` does **not** fire for fresh room codes. It only fires when joining a locked or expired room, or when a `rejoin` fails (e.g. token expired). There is no way to "check if a room exists" from the client.
-- `room_activated` carries a full participant snapshot in `msg.participants` — update the full participants array when handling this message, not just the `roomPhase` field.
-- Server may omit optional fields entirely (send `undefined`) rather than `null` — use loose `!= null` checks when filtering optional fields like `proposalEpochMs`.
+**Capacity check:**
+- `src/utils/fetchPartyCapacity.ts`: `GET /capacity` → `{ accepting_rooms, reason }` (10 req/60 s limit; HTTP 200 always). Fails closed on error/non-OK; 429 fails open. Derives HTTP base from `VITE_WS_URL` via `wsUrlToHttpBase`.
+- `src/hooks/usePartyCapacity.ts`: polls every 30 s if unavailable; stops once accepting. Accepts injectable `fetcher` for testing; use `vi.useFakeTimers()` + `vi.advanceTimersByTimeAsync` for polling tests.
+- `CoordinateSection` / `PartyJoinOverlay`: receive `accepting` / `loadingCapacity` props. Show "Party rooms are temporarily unavailable." banner + `aria-disabled` button when unavailable. Deep-link path (`?code=`) bypasses `CoordinateSection` — `PartyJoinOverlay` must also receive these props.
+- No jest-dom: use `element.getAttribute('aria-disabled')` not `toHaveAttribute`.
 
-### Capacity check
-
-The server exposes `GET /capacity` → `{ accepting_rooms: boolean, reason: null | "HIGH_LOAD" }` (rate-limited: 10 req/60 s per IP; always HTTP 200 even when at capacity).
-
-- `src/utils/fetchPartyCapacity.ts` — fetches the endpoint. **Fails closed** (returns `false`) on network error or non-OK response; 429 fails open (server is alive, WS may still work). Derives the HTTP base URL from `VITE_WS_URL` via `wsUrlToHttpBase` (`ws://host/ws` → `http://host`).
-- `src/hooks/usePartyCapacity.ts` — calls `fetchPartyCapacity` once on mount. If unavailable, polls every 30 s until capacity opens; stops polling once `accepting_rooms` is `true`. Accepts an injectable `fetcher` parameter for testing (use `vi.useFakeTimers()` + `vi.advanceTimersByTimeAsync` for polling tests).
-- `CoordinateSection` and `PartyJoinOverlay` both accept `accepting: boolean` and `loadingCapacity: boolean` props. When capacity is unavailable: show "Party rooms are temporarily unavailable." banner and set `aria-disabled` on the affected button(s). The deep-link join path (`?code=`) bypasses `CoordinateSection`, so `PartyJoinOverlay` must also receive these props.
-- `toHaveAttribute` is **not available** in this project (no jest-dom) — use `element.getAttribute('aria-disabled')` instead.
-
-### Testing: WebSocket hooks
-
-- `useRoom` accepts an injectable `socketFactory?: () => RoomSocket` parameter — avoids patching `globalThis.WebSocket`
-- In tests, pass a `FakeRoomSocket` with a `simulateMessage(msg)` helper
-- Use `vi.useFakeTimers()` for reconnect-countdown and auto-dismiss timing tests
-- Each `openConnection()` call captures `let thisSocket` before defining the callback object. All callbacks guard with `if (socketRef.current !== thisSocket) return` to prevent stale sockets (e.g. from React StrictMode double-invoke) from clobbering live state. The cleanup effect resets to `INITIAL_STATE` so that StrictMode remounts can reconnect cleanly.
-- The `ProposeCtaBar` button is only enabled when `roomPhase === 'active'`. E2E tests that need to click "Propose This Time" must join with `roomState: 'active'` (override available in the `joinedMsg()` helper in `party-ws.spec.ts`).
+**WebSocket testing:**
+- `useRoom` accepts injectable `socketFactory?: () => RoomSocket`; pass `FakeRoomSocket` with `simulateMessage(msg)` helper
+- `thisSocket` guard prevents stale sockets from clobbering state; cleanup resets to `INITIAL_STATE` for StrictMode remounts
+- `ProposeCtaBar` enabled only when `roomPhase === 'active'`; E2E tests use `joinedMsg()` override in `party-ws.spec.ts`
 
 ## MVP Scope
 
-- Timezone detection from browser (user-overridable)
-- Natural language / text timestamp import via chrono-node
-- Manual time + timezone selection UI
-- Discord timestamp export (click-to-copy formats like `<t:1543392060:f>`)
-- Deep link export with preconfigured timestamp
+- Timezone detection from browser (overridable)
+- Natural language timestamp import via chrono-node
+- Manual time + timezone selection
+- Discord timestamp export
+- Deep link export
