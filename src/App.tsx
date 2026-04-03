@@ -22,6 +22,7 @@ import { getAllFormats } from './utils/discordTimestamp'
 import { generateRoomCode } from './utils/partyLink'
 import { isPartyModeEnabled } from './utils/appUrl'
 import { loadLockedParticipants } from './room/roomSession'
+import { usePartyCapacity } from './hooks/usePartyCapacity'
 
 function App() {
   const { timezone, setTimezone } = useTimezone()
@@ -32,6 +33,7 @@ function App() {
   const resultRef = useRef<HTMLElement | null>(null)
   const timezonePickerRef = useRef<HTMLDivElement | null>(null)
   const { appMode, startParty, joinParty, enterRoom, lockIn, deadRoom, backToSolo } = usePartyMode()
+  const { accepting: partyAccepting, loading: partyCapacityLoading } = usePartyCapacity()
   const isSoloMode = appMode.kind === 'solo'
   // Fresh room code generated each time the create overlay is opened
   const [pendingRoomCode, setPendingRoomCode] = useState(() => generateRoomCode())
@@ -188,7 +190,12 @@ function App() {
             <ConversionDisplay timestamp={timestamp} timezone={timezone} />
           </section>
 
-          <CoordinateSection onStartParty={handleStartParty} onJoinParty={() => joinParty()} />
+          <CoordinateSection
+            onStartParty={handleStartParty}
+            onJoinParty={() => joinParty()}
+            accepting={partyAccepting}
+            loadingCapacity={partyCapacityLoading}
+          />
         </div>
 
         {/* Right column — slides in when a time is selected */}
