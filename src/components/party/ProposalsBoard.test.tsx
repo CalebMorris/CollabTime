@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
 import { ProposalsBoard } from './ProposalsBoard'
 import type { Participant, Proposal } from '../../room/roomProtocol'
 
@@ -90,6 +90,60 @@ describe('ProposalsBoard', () => {
       />,
     )
     expect(screen.getByRole('status')).toBeDefined()
+  })
+
+  it('calls onAgree with epochMs when +1 is clicked on another participant row', () => {
+    const onAgree = vi.fn()
+    const proposals: Proposal[] = [
+      { participantToken: 'pt-1', epochMs: EPOCH_MS },
+      { participantToken: 'pt-2', epochMs: EPOCH_MS + 3600000 },
+    ]
+    render(
+      <ProposalsBoard
+        participants={[p1, p2]}
+        proposals={proposals}
+        ownParticipantToken="pt-1"
+        viewerTimezone={TIMEZONE}
+        isLocked={false}
+        onAgree={onAgree}
+      />,
+    )
+    // p2 is not own, should have a +1 button
+    fireEvent.click(screen.getByRole('button', { name: /agree/i }))
+    expect(onAgree).toHaveBeenCalledWith(EPOCH_MS + 3600000)
+  })
+
+  it('does not show +1 button on own row', () => {
+    const proposals: Proposal[] = [{ participantToken: 'pt-1', epochMs: EPOCH_MS }]
+    render(
+      <ProposalsBoard
+        participants={[p1]}
+        proposals={proposals}
+        ownParticipantToken="pt-1"
+        viewerTimezone={TIMEZONE}
+        isLocked={false}
+        onAgree={vi.fn()}
+      />,
+    )
+    expect(screen.queryByRole('button', { name: /agree/i })).toBeNull()
+  })
+
+  it('shows agreed button when viewer already has the same proposal as another participant', () => {
+    const proposals: Proposal[] = [
+      { participantToken: 'pt-1', epochMs: EPOCH_MS },
+      { participantToken: 'pt-2', epochMs: EPOCH_MS },
+    ]
+    render(
+      <ProposalsBoard
+        participants={[p1, p2]}
+        proposals={proposals}
+        ownParticipantToken="pt-1"
+        viewerTimezone={TIMEZONE}
+        isLocked={false}
+        onAgree={vi.fn()}
+      />,
+    )
+    expect(screen.getByRole('button', { name: /agreed/i })).toBeDefined()
   })
 
   it('passes own proposal to the own participant row', () => {

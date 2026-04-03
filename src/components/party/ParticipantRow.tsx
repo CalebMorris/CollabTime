@@ -8,9 +8,11 @@ interface Props {
   viewerTimezone: string
   isLocked: boolean
   isRecentlyProposed?: boolean
+  onAgree?: (epochMs: number) => void
+  isAlreadyAgreed?: boolean
 }
 
-export function ParticipantRow({ participant, proposal, isOwn, viewerTimezone, isLocked, isRecentlyProposed }: Props) {
+export function ParticipantRow({ participant, proposal, isOwn, viewerTimezone, isLocked, isRecentlyProposed, onAgree, isAlreadyAgreed }: Props) {
   const isReconnecting = !participant.isConnected && proposal !== null
   const isDisconnected = !participant.isConnected && proposal === null
 
@@ -46,7 +48,7 @@ export function ParticipantRow({ participant, proposal, isOwn, viewerTimezone, i
       </div>
 
       {/* Right: proposal time or placeholder */}
-      <div className="shrink-0 text-right">
+      <div className="shrink-0 flex items-center gap-2">
         {isLocked && (
           <span className="text-emerald-400 font-semibold">✓</span>
         )}
@@ -57,6 +59,21 @@ export function ParticipantRow({ participant, proposal, isOwn, viewerTimezone, i
         ) : !isLocked ? (
           <span className="text-gray-500">—</span>
         ) : null}
+        {!isOwn && !isLocked && proposal !== null && onAgree !== undefined && (
+          <button
+            onClick={() => onAgree(proposal.epochMs)}
+            aria-label={isAlreadyAgreed ? 'Agreed' : `Agree with ${participant.nickname}'s proposal`}
+            title={isAlreadyAgreed ? 'You already proposed this time' : 'Propose this time'}
+            className={[
+              'text-xs px-1.5 py-0.5 rounded border transition-colors',
+              isAlreadyAgreed
+                ? 'border-emerald-600 text-emerald-400 cursor-default'
+                : 'border-gray-600 text-gray-400 hover:border-indigo-400 hover:text-indigo-300',
+            ].join(' ')}
+          >
+            {isAlreadyAgreed ? '✓' : '+1'}
+          </button>
+        )}
       </div>
     </div>
   )

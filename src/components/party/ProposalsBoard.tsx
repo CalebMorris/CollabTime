@@ -9,6 +9,7 @@ interface Props {
   ownParticipantToken: string | null
   viewerTimezone: string
   isLocked: boolean
+  onAgree?: (epochMs: number) => void
 }
 
 export function ProposalsBoard({
@@ -17,8 +18,12 @@ export function ProposalsBoard({
   ownParticipantToken,
   viewerTimezone,
   isLocked,
+  onAgree,
 }: Props) {
   const proposalByToken = new Map(proposals.map((p) => [p.participantToken, p]))
+  const ownProposalEpochMs = ownParticipantToken != null
+    ? (proposalByToken.get(ownParticipantToken)?.epochMs ?? null)
+    : null
   const connectedCount = participants.filter((p) => p.isConnected).length
   // Only connected participants' proposals count toward consensus
   const activeProposals = proposals.filter((p) => {
@@ -62,17 +67,27 @@ export function ProposalsBoard({
       </h2>
 
       <div className="flex flex-col gap-1">
-        {participants.map((participant) => (
-          <ParticipantRow
-            key={participant.participantToken}
-            participant={participant}
-            proposal={proposalByToken.get(participant.participantToken) ?? null}
-            isOwn={participant.participantToken === ownParticipantToken}
-            viewerTimezone={viewerTimezone}
-            isLocked={isLocked}
-            isRecentlyProposed={recentlyProposed === participant.participantToken}
-          />
-        ))}
+        {participants.map((participant) => {
+          const isOwn = participant.participantToken === ownParticipantToken
+          const rowProposal = proposalByToken.get(participant.participantToken) ?? null
+          return (
+            <ParticipantRow
+              key={participant.participantToken}
+              participant={participant}
+              proposal={rowProposal}
+              isOwn={isOwn}
+              viewerTimezone={viewerTimezone}
+              isLocked={isLocked}
+              isRecentlyProposed={recentlyProposed === participant.participantToken}
+              onAgree={!isOwn ? onAgree : undefined}
+              isAlreadyAgreed={
+                !isOwn && rowProposal !== null && ownProposalEpochMs !== null
+                  ? rowProposal.epochMs === ownProposalEpochMs
+                  : false
+              }
+            />
+          )
+        })}
       </div>
 
       {participants.length === 1 && (

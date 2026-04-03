@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
 import { ParticipantRow } from './ParticipantRow'
 import type { Participant, Proposal } from '../../room/roomProtocol'
 
@@ -150,5 +150,94 @@ describe('ParticipantRow — locked state', () => {
       />,
     )
     expect(screen.getByText('✓')).toBeDefined()
+  })
+})
+
+describe('ParticipantRow — +1 button', () => {
+  it('shows +1 button for another participant with a proposal', () => {
+    render(
+      <ParticipantRow
+        participant={connectedParticipant}
+        proposal={proposal}
+        isOwn={false}
+        viewerTimezone={TIMEZONE}
+        isLocked={false}
+        onAgree={vi.fn()}
+      />,
+    )
+    expect(screen.getByRole('button', { name: /agree/i })).toBeDefined()
+  })
+
+  it('calls onAgree with the proposal epochMs when clicked', () => {
+    const onAgree = vi.fn()
+    render(
+      <ParticipantRow
+        participant={connectedParticipant}
+        proposal={proposal}
+        isOwn={false}
+        viewerTimezone={TIMEZONE}
+        isLocked={false}
+        onAgree={onAgree}
+      />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: /agree/i }))
+    expect(onAgree).toHaveBeenCalledWith(EPOCH_MS)
+  })
+
+  it('does not show +1 button on own row', () => {
+    render(
+      <ParticipantRow
+        participant={connectedParticipant}
+        proposal={proposal}
+        isOwn={true}
+        viewerTimezone={TIMEZONE}
+        isLocked={false}
+        onAgree={vi.fn()}
+      />,
+    )
+    expect(screen.queryByRole('button', { name: /agree/i })).toBeNull()
+  })
+
+  it('does not show +1 button when room is locked', () => {
+    render(
+      <ParticipantRow
+        participant={connectedParticipant}
+        proposal={proposal}
+        isOwn={false}
+        viewerTimezone={TIMEZONE}
+        isLocked={true}
+        onAgree={vi.fn()}
+      />,
+    )
+    expect(screen.queryByRole('button', { name: /agree/i })).toBeNull()
+  })
+
+  it('does not show +1 button when participant has no proposal', () => {
+    render(
+      <ParticipantRow
+        participant={connectedParticipant}
+        proposal={null}
+        isOwn={false}
+        viewerTimezone={TIMEZONE}
+        isLocked={false}
+        onAgree={vi.fn()}
+      />,
+    )
+    expect(screen.queryByRole('button', { name: /agree/i })).toBeNull()
+  })
+
+  it('shows agreed state when viewer already agreed with this proposal', () => {
+    render(
+      <ParticipantRow
+        participant={connectedParticipant}
+        proposal={proposal}
+        isOwn={false}
+        viewerTimezone={TIMEZONE}
+        isLocked={false}
+        onAgree={vi.fn()}
+        isAlreadyAgreed={true}
+      />,
+    )
+    expect(screen.getByRole('button', { name: /agreed/i })).toBeDefined()
   })
 })
