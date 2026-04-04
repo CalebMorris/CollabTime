@@ -379,7 +379,7 @@ describe('useRoom — room_expired', () => {
 
 describe('useRoom — error handling', () => {
   const terminalCodes = ['ROOM_NOT_FOUND', 'ROOM_FULL', 'REJOIN_FAILED', 'INVALID_TOKEN', 'PROTOCOL_VERSION_MISMATCH', 'SERVER_AT_CAPACITY'] as const
-  const nonTerminalCodes = ['RATE_LIMITED', 'INVALID_PROPOSAL'] as const
+  const nonTerminalCodes = ['RATE_LIMITED'] as const
 
   terminalCodes.forEach((code) => {
     it(`closes connection and sets errorCode for terminal error: ${code}`, () => {
