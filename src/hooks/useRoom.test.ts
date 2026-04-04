@@ -55,9 +55,8 @@ const makeJoinedMsg = (overrides?: Partial<ServerMessage & { type: 'joined' }>):
     code: ROOM_CODE,
     state: 'waiting',
     participants: [
-      { participantToken: 'part-def', nickname: 'Teal Fox', isConnected: true, proposalEpochMs: null },
+      { participantToken: 'part-def', nickname: 'Teal Fox', isConnected: true },
     ],
-    lockedInEpochMs: null,
   },
   ...overrides,
 })
@@ -179,11 +178,9 @@ describe('useRoom — joined message', () => {
       room: {
         code: ROOM_CODE,
         state: 'waiting',
-        // proposalEpochMs field absent entirely (undefined when accessed)
         participants: [
-          { participantToken: 'part-def', nickname: 'Teal Fox', isConnected: true } as never,
+          { participantToken: 'part-def', nickname: 'Teal Fox', isConnected: true },
         ],
-        lockedInEpochMs: null,
       },
     }))
     expect(result.current.proposals).toHaveLength(0)
@@ -207,7 +204,6 @@ describe('useRoom — joined message', () => {
           { participantToken: 'part-def', nickname: 'Teal Fox', isConnected: true, proposalEpochMs: 1711209600000 },
           { participantToken: 'part-xyz', nickname: 'Azure Sloth', isConnected: true, proposalEpochMs: 1711209600000 },
         ],
-        lockedInEpochMs: null,
       },
     }))
     expect(result.current.proposals).toHaveLength(2)

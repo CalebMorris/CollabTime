@@ -196,7 +196,7 @@ export function useRoom(
             isConnected: p.isConnected,
           })),
           proposals,
-          lockedEpochMs: msg.room.lockedInEpochMs,
+          lockedEpochMs: msg.room.lockedInEpochMs ?? null,
           gracePeriodStartedAt: null,
           errorCode: null,
         }))

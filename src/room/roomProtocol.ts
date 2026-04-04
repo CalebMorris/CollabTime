@@ -20,9 +20,9 @@ export interface RoomSnapshot {
     participantToken: string
     nickname: string
     isConnected: boolean
-    proposalEpochMs: number | null
+    proposalEpochMs?: number
   }>
-  lockedInEpochMs: number | null
+  lockedInEpochMs?: number
 }
 
 // ─── Client → Server messages ─────────────────────────────────────────────────

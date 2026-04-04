@@ -26,9 +26,8 @@ describe('parseServerMessage', () => {
         code: 'purple-falcon-bridge',
         state: 'waiting',
         participants: [
-          { participantToken: 'def456', nickname: 'Teal Fox', isConnected: true, proposalEpochMs: null },
+          { participantToken: 'def456', nickname: 'Teal Fox', isConnected: true },
         ],
-        lockedInEpochMs: null,
       },
     })
     const msg = parseServerMessage(raw)
@@ -152,7 +151,7 @@ describe('parseServerMessage — field validation', () => {
       participantToken: 'def',
       nickname: 'Teal Fox',
       protocolVersion: '1.0',
-      room: { code: 'x-y-z', state: 'waiting', participants: null, lockedInEpochMs: null },
+      room: { code: 'x-y-z', state: 'waiting', participants: null },
     }))).toBeNull()
   })
 
