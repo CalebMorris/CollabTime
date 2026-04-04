@@ -115,6 +115,8 @@ export type ServerErrorCode =
   | 'INVALID_PROPOSAL'
   | 'REJOIN_FAILED'
   | 'INVALID_TOKEN'
+  | 'PROTOCOL_VERSION_MISMATCH'
+  | 'SERVER_AT_CAPACITY'
 
 export interface ErrorMessage {
   type: 'error'
