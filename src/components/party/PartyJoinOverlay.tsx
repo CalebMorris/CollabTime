@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useFocusTrap } from '../../hooks/useFocusTrap'
 import { ROOM_CODE_RE } from '../../utils/appUrl'
 
@@ -16,6 +16,13 @@ export function PartyJoinOverlay({ initialCode, onJoin, onDismiss, accepting, lo
   const isValid = ROOM_CODE_RE.test(inputValue)
   const showError = inputValue.length > 0 && !isValid
   const capacityDisabled = loadingCapacity || !accepting
+
+  const [showLoadingHint, setShowLoadingHint] = useState(false)
+  useEffect(() => {
+    if (!loadingCapacity) { setShowLoadingHint(false); return }
+    const t = setTimeout(() => setShowLoadingHint(true), 200)
+    return () => clearTimeout(t)
+  }, [loadingCapacity])
 
   const dialogRef = useRef<HTMLDivElement>(null)
   useFocusTrap(dialogRef, onDismiss)
@@ -83,7 +90,10 @@ export function PartyJoinOverlay({ initialCode, onJoin, onDismiss, accepting, lo
         {/* Spacer to keep layout stable when no error */}
         {!showError && <div className="mb-3" />}
 
-        {/* Capacity unavailable banner */}
+        {/* Capacity loading hint / unavailable banner */}
+        {showLoadingHint && (
+          <p id="join-capacity-loading-hint" className="text-sm text-gray-400 mb-3">One moment…</p>
+        )}
         {!loadingCapacity && !accepting && (
           <p className="text-sm text-gray-400 mb-3">Party rooms are temporarily unavailable.</p>
         )}
@@ -93,7 +103,10 @@ export function PartyJoinOverlay({ initialCode, onJoin, onDismiss, accepting, lo
           onClick={handleSubmit}
           disabled={!isValid}
           aria-disabled={capacityDisabled || undefined}
-          className="min-h-[44px] w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed aria-disabled:opacity-40 aria-disabled:cursor-not-allowed mb-4"
+          aria-describedby={showLoadingHint ? 'join-capacity-loading-hint' : undefined}
+          className={`min-h-[44px] w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed mb-4 ${
+            loadingCapacity && isValid ? 'cursor-wait opacity-60' : 'aria-disabled:opacity-40 aria-disabled:cursor-not-allowed'
+          }`}
         >
           Join Party
         </button>
