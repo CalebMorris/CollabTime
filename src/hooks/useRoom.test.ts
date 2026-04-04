@@ -387,7 +387,7 @@ describe('useRoom — error handling', () => {
       const { result } = renderHook(() => useRoom(ROOM_CODE, factory))
       act(() => result.current.connect())
       act(() => latest().simulateOpen())
-      act(() => latest().simulateMessage({ type: 'error', code }))
+      act(() => latest().simulateMessage({ type: 'error', code, message: 'error' }))
       expect(result.current.errorCode).toBe(code)
       expect(['connection_failed', 'idle', 'expired'].includes(result.current.connectionPhase) ||
         result.current.connectionPhase === 'connection_failed').toBe(true)
@@ -401,7 +401,7 @@ describe('useRoom — error handling', () => {
       act(() => result.current.connect())
       act(() => latest().simulateOpen())
       act(() => latest().simulateMessage(makeJoinedMsg()))
-      act(() => latest().simulateMessage({ type: 'error', code }))
+      act(() => latest().simulateMessage({ type: 'error', code, message: 'error' }))
       expect(result.current.errorCode).toBe(code)
       expect(result.current.connectionPhase).toBe('connected')
     })

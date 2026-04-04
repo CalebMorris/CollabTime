@@ -120,7 +120,7 @@ export type ServerErrorCode =
 export interface ErrorMessage {
   type: 'error'
   code: ServerErrorCode
-  message?: string
+  message: string
 }
 
 export type ServerMessage =
