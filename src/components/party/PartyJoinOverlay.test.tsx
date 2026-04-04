@@ -1,5 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { render, screen, fireEvent, act } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { PartyJoinOverlay } from './PartyJoinOverlay'
 
 const defaultProps = {
@@ -165,5 +165,22 @@ describe('PartyJoinOverlay — capacity unavailable', () => {
   it('does not show the banner while loading capacity', () => {
     render(<PartyJoinOverlay {...defaultProps} initialCode="purple-falcon-bridge" loadingCapacity={true} />)
     expect(screen.queryByText(/party rooms are temporarily unavailable/i)).toBeNull()
+  })
+
+  describe('loading hint timing', () => {
+    beforeEach(() => { vi.useFakeTimers() })
+    afterEach(() => { vi.useRealTimers() })
+
+    it('shows "One moment…" after 200ms when loading', async () => {
+      render(<PartyJoinOverlay {...defaultProps} initialCode="purple-falcon-bridge" loadingCapacity={true} />)
+      await act(() => vi.advanceTimersByTimeAsync(200))
+      expect(screen.getByText(/one moment/i)).toBeDefined()
+    })
+
+    it('does not show "One moment…" before 200ms', () => {
+      render(<PartyJoinOverlay {...defaultProps} initialCode="purple-falcon-bridge" loadingCapacity={true} />)
+      vi.advanceTimersByTime(199)
+      expect(screen.queryByText(/one moment/i)).toBeNull()
+    })
   })
 })

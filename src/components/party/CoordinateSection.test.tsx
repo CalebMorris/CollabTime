@@ -1,5 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { render, screen, fireEvent, act } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { CoordinateSection } from './CoordinateSection'
 
 const defaultProps = {
@@ -88,6 +88,35 @@ describe('CoordinateSection', () => {
     it('does not show the unavailable banner while loading', () => {
       render(<CoordinateSection {...defaultProps} loadingCapacity={true} />)
       expect(screen.queryByText(/party rooms are temporarily unavailable/i)).toBeNull()
+    })
+
+    it('buttons do not have unavailable dark style when loading', () => {
+      render(<CoordinateSection {...defaultProps} loadingCapacity={true} />)
+      const startBtn = screen.getByRole('button', { name: /start a party/i })
+      expect(startBtn.className).not.toContain('bg-indigo-900')
+    })
+
+    describe('loading hint timing', () => {
+      beforeEach(() => { vi.useFakeTimers() })
+      afterEach(() => { vi.useRealTimers() })
+
+      it('does not show "One moment…" before 200ms', () => {
+        render(<CoordinateSection {...defaultProps} loadingCapacity={true} />)
+        vi.advanceTimersByTime(199)
+        expect(screen.queryByText(/one moment/i)).toBeNull()
+      })
+
+      it('shows "One moment…" after 200ms when loading', async () => {
+        render(<CoordinateSection {...defaultProps} loadingCapacity={true} />)
+        await act(() => vi.advanceTimersByTimeAsync(200))
+        expect(screen.getByText(/one moment/i)).toBeDefined()
+      })
+
+      it('does not show "One moment…" when not loading', async () => {
+        render(<CoordinateSection {...defaultProps} loadingCapacity={false} />)
+        await act(() => vi.advanceTimersByTimeAsync(200))
+        expect(screen.queryByText(/one moment/i)).toBeNull()
+      })
     })
   })
 })
