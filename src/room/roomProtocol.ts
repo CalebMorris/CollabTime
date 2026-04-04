@@ -20,9 +20,9 @@ export interface RoomSnapshot {
     participantToken: string
     nickname: string
     isConnected: boolean
-    proposalEpochMs: number | null
+    proposalEpochMs?: number
   }>
-  lockedInEpochMs: number | null
+  lockedInEpochMs?: number
 }
 
 // ─── Client → Server messages ─────────────────────────────────────────────────
@@ -112,14 +112,15 @@ export type ServerErrorCode =
   | 'ROOM_NOT_ACTIVE'
   | 'ROOM_FULL'
   | 'RATE_LIMITED'
-  | 'INVALID_PROPOSAL'
   | 'REJOIN_FAILED'
   | 'INVALID_TOKEN'
+  | 'PROTOCOL_VERSION_MISMATCH'
+  | 'SERVER_AT_CAPACITY'
 
 export interface ErrorMessage {
   type: 'error'
   code: ServerErrorCode
-  message?: string
+  message: string
 }
 
 export type ServerMessage =

@@ -84,7 +84,7 @@ describe('PartyRoom', () => {
       sessionToken: 'st-1',
       nickname: 'Teal Fox',
       protocolVersion: '1.0',
-      room: { state: 'waiting', participants: [], lockedInEpochMs: null },
+      room: { state: 'waiting', participants: [] },
     })
     expect(screen.getByText(/pick a time/i)).toBeDefined()
   })
@@ -105,7 +105,7 @@ describe('PartyRoom', () => {
       sessionToken: 'st-1',
       nickname: 'Teal Fox',
       protocolVersion: '1.0',
-      room: { state: 'waiting', participants: [], lockedInEpochMs: null },
+      room: { state: 'waiting', participants: [] },
     })
     expect(screen.getByText(/teal fox/i)).toBeDefined()
   })
@@ -126,7 +126,7 @@ describe('PartyRoom', () => {
       sessionToken: 'st-1',
       nickname: 'Teal Fox',
       protocolVersion: '1.0',
-      room: { state: 'waiting', participants: [], lockedInEpochMs: null },
+      room: { state: 'waiting', participants: [] },
     })
     expect(screen.getByText('Local time')).toBeDefined()
     expect(screen.getByText('UTC')).toBeDefined()

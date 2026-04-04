@@ -50,6 +50,8 @@ const TERMINAL_ERRORS: ServerErrorCode[] = [
   'ROOM_FULL',
   'REJOIN_FAILED',
   'INVALID_TOKEN',
+  'PROTOCOL_VERSION_MISMATCH',
+  'SERVER_AT_CAPACITY',
 ]
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
@@ -194,7 +196,7 @@ export function useRoom(
             isConnected: p.isConnected,
           })),
           proposals,
-          lockedEpochMs: msg.room.lockedInEpochMs,
+          lockedEpochMs: msg.room.lockedInEpochMs ?? null,
           gracePeriodStartedAt: null,
           errorCode: null,
         }))

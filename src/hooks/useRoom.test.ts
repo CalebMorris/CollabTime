@@ -55,9 +55,8 @@ const makeJoinedMsg = (overrides?: Partial<ServerMessage & { type: 'joined' }>):
     code: ROOM_CODE,
     state: 'waiting',
     participants: [
-      { participantToken: 'part-def', nickname: 'Teal Fox', isConnected: true, proposalEpochMs: null },
+      { participantToken: 'part-def', nickname: 'Teal Fox', isConnected: true },
     ],
-    lockedInEpochMs: null,
   },
   ...overrides,
 })
@@ -179,11 +178,9 @@ describe('useRoom — joined message', () => {
       room: {
         code: ROOM_CODE,
         state: 'waiting',
-        // proposalEpochMs field absent entirely (undefined when accessed)
         participants: [
-          { participantToken: 'part-def', nickname: 'Teal Fox', isConnected: true } as never,
+          { participantToken: 'part-def', nickname: 'Teal Fox', isConnected: true },
         ],
-        lockedInEpochMs: null,
       },
     }))
     expect(result.current.proposals).toHaveLength(0)
@@ -207,7 +204,6 @@ describe('useRoom — joined message', () => {
           { participantToken: 'part-def', nickname: 'Teal Fox', isConnected: true, proposalEpochMs: 1711209600000 },
           { participantToken: 'part-xyz', nickname: 'Azure Sloth', isConnected: true, proposalEpochMs: 1711209600000 },
         ],
-        lockedInEpochMs: null,
       },
     }))
     expect(result.current.proposals).toHaveLength(2)
@@ -378,8 +374,8 @@ describe('useRoom — room_expired', () => {
 })
 
 describe('useRoom — error handling', () => {
-  const terminalCodes = ['ROOM_NOT_FOUND', 'ROOM_FULL', 'REJOIN_FAILED', 'INVALID_TOKEN'] as const
-  const nonTerminalCodes = ['RATE_LIMITED', 'INVALID_PROPOSAL'] as const
+  const terminalCodes = ['ROOM_NOT_FOUND', 'ROOM_FULL', 'REJOIN_FAILED', 'INVALID_TOKEN', 'PROTOCOL_VERSION_MISMATCH', 'SERVER_AT_CAPACITY'] as const
+  const nonTerminalCodes = ['RATE_LIMITED'] as const
 
   terminalCodes.forEach((code) => {
     it(`closes connection and sets errorCode for terminal error: ${code}`, () => {
@@ -387,7 +383,7 @@ describe('useRoom — error handling', () => {
       const { result } = renderHook(() => useRoom(ROOM_CODE, factory))
       act(() => result.current.connect())
       act(() => latest().simulateOpen())
-      act(() => latest().simulateMessage({ type: 'error', code }))
+      act(() => latest().simulateMessage({ type: 'error', code, message: 'error' }))
       expect(result.current.errorCode).toBe(code)
       expect(['connection_failed', 'idle', 'expired'].includes(result.current.connectionPhase) ||
         result.current.connectionPhase === 'connection_failed').toBe(true)
@@ -401,7 +397,7 @@ describe('useRoom — error handling', () => {
       act(() => result.current.connect())
       act(() => latest().simulateOpen())
       act(() => latest().simulateMessage(makeJoinedMsg()))
-      act(() => latest().simulateMessage({ type: 'error', code }))
+      act(() => latest().simulateMessage({ type: 'error', code, message: 'error' }))
       expect(result.current.errorCode).toBe(code)
       expect(result.current.connectionPhase).toBe('connected')
     })
