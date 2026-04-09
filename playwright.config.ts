@@ -1,6 +1,7 @@
 import { defineConfig, devices } from 'playwright/test'
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:5173/CollabTime/'
+const isLocalhost = ['localhost', '127.0.0.1'].includes(new URL(BASE_URL).hostname)
 
 export default defineConfig({
   testDir: './e2e',
@@ -12,6 +13,14 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
+  webServer: isLocalhost
+    ? {
+        command: 'npm run dev',
+        url: 'http://localhost:5173/CollabTime/',
+        reuseExistingServer: !process.env.CI,
+        timeout: 30_000,
+      }
+    : undefined,
   projects: [
     {
       name: 'chromium',
