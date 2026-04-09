@@ -33,7 +33,11 @@ SCREENSHOT_DIR=tmp/shots npm run screenshots
 
 ### Integration tests (Playwright)
 
-The `e2e/` directory contains Playwright integration tests that run against a live instance of the app.
+The `e2e/` directory contains Playwright integration tests that run against a live instance of the app. Tests can be run locally or inside Docker.
+
+> The party-ws tests use `page.routeWebSocket()` to intercept the WebSocket connection and simulate server messages — no live WebSocket server is required.
+
+#### Locally
 
 **Install browser binaries (one-time):**
 
@@ -41,16 +45,16 @@ The `e2e/` directory contains Playwright integration tests that run against a li
 npx playwright install
 ```
 
-**Run against the local dev server** (start `npm run dev` first):
-
-```
-npm run test:e2e
-```
-
-**Run against a different target** (e.g. staging or production):
+The dev server starts automatically when you run tests. To run against a different target instead (e.g. staging or production), set `BASE_URL` and start no local server:
 
 ```
 BASE_URL=https://calebmorris.github.io/CollabTime/ npm run test:e2e
+```
+
+**Run all tests:**
+
+```
+npm run test:e2e
 ```
 
 **Interactive UI mode** (useful for debugging):
@@ -72,15 +76,41 @@ npx playwright test --grep "parses an ISO 8601"
 npx playwright test --project=chromium
 ```
 
-Test files:
+#### In Docker
+
+Runs tests in an isolated Linux environment with browsers pre-installed — avoids OS-level browser compatibility issues.
+
+**Build the image (one-time, cached on subsequent runs):**
+
+```
+docker compose build
+```
+
+**Run all tests:**
+
+```
+docker compose run --rm e2e
+```
+
+**Run a specific file or browser:**
+
+```
+docker compose run --rm e2e npx playwright test e2e/solo-mode.spec.ts
+docker compose run --rm e2e npx playwright test --project=chromium
+```
+
+Screenshots and traces from failures are written to `test-results/` on the host.
+
+> Note: if you upgrade `playwright` in `package.json`, update the `FROM` version in `Dockerfile` to match.
+
+#### Test files
 
 | File | What it covers |
 |---|---|
 | `e2e/solo-mode.spec.ts` | Page load, text import, manual selector, timezone picker, export panel, deep links |
 | `e2e/party-overlays.spec.ts` | Create/join overlays — modal behaviour, validation, clipboard, focus trap |
 | `e2e/party-ws.spec.ts` | Party room with mocked WebSocket — connection lifecycle, proposals, lock-in, dead room |
-
-> The party-ws tests use `page.routeWebSocket()` to intercept the WebSocket connection and simulate server messages — no live WebSocket server is required.
+| `e2e/help-faq.spec.ts` | Help modal open/close, backdrop/escape dismissal, feature flag gating |
 
 ---
 
